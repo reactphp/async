@@ -2,7 +2,7 @@
 
 Async utilities for React.
 
-It is heavily based on [async.js](https://github.com/caolan/async).
+It is heavily influenced by [async.js](https://github.com/caolan/async).
 
 [![Build Status](https://secure.travis-ci.org/react-php/async.png?branch=master)](http://travis-ci.org/react-php/zmq)
 
@@ -13,7 +13,7 @@ The recommended way to install react/async is [through composer](http://getcompo
 ```JSON
 {
     "require": {
-        "react/zmq": "dev-master"
+        "react/async": "dev-master"
     }
 }
 ```
