@@ -1,4 +1,4 @@
-# React-Async
+# React/Async
 
 Async utilities for React.
 
