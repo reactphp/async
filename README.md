@@ -56,6 +56,11 @@ React\Async\Util::parallel(
 $loop->run();
 ```
 
+## Todo
+
+ * Implement waterfall()
+ * Implement queue()
+
 ## Tests
 
 To run the test suite, you need PHPUnit.
