@@ -1,0 +1,14 @@
+{
+    "hash": "b20b1c26a42a1a7a70b73224c4d3134f",
+    "packages": [
+
+    ],
+    "packages-dev": null,
+    "aliases": [
+
+    ],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "react/event-loop": 20
+    }
+}
