@@ -22,12 +22,12 @@ class UtilParallelTest extends TestCase
 
         $tasks = array(
             function ($callback, $errback) use ($loop) {
-                $loop->addTimer(0.006, function () use ($callback) {
+                $loop->addTimer(0.1, function () use ($callback) {
                     $callback('foo');
                 });
             },
             function ($callback, $errback) use ($loop) {
-                $loop->addTimer(0.005, function () use ($callback) {
+                $loop->addTimer(0.1, function () use ($callback) {
                     $callback('bar');
                 });
             },
@@ -44,7 +44,7 @@ class UtilParallelTest extends TestCase
         $loop->run();
 
         $timer->stop();
-        $timer->assertInRange(0.005, 0.013);
+        $timer->assertInRange(0.1, 0.2);
     }
 
     public function testParallelWithError()

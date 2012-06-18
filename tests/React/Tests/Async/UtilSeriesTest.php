@@ -22,12 +22,12 @@ class UtilSeriesTest extends TestCase
 
         $tasks = array(
             function ($callback, $errback) use ($loop) {
-                $loop->addTimer(0.001, function () use ($callback) {
+                $loop->addTimer(0.05, function () use ($callback) {
                     $callback('foo');
                 });
             },
             function ($callback, $errback) use ($loop) {
-                $loop->addTimer(0.002, function () use ($callback) {
+                $loop->addTimer(0.05, function () use ($callback) {
                     $callback('bar');
                 });
             },
@@ -44,7 +44,7 @@ class UtilSeriesTest extends TestCase
         $loop->run();
 
         $timer->stop();
-        $timer->assertInRange(0.003, 0.010);
+        $timer->assertInRange(0.10, 0.20);
     }
 
     public function testSeriesWithError()
