@@ -58,7 +58,6 @@ $loop->run();
 
 ## Todo
 
- * Implement waterfall()
  * Implement queue()
 
 ## Tests

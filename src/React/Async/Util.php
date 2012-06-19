@@ -71,4 +71,28 @@ class Util
             call_user_func($task, $taskCallback, $taskErrback);
         }
     }
+
+    public static function waterfall($tasks, $callback, $errback)
+    {
+        $taskCallback = function () use (&$next) {
+            call_user_func_array($next, func_get_args());
+        };
+
+        $done = function () use ($callback) {
+            call_user_func_array($callback, func_get_args());
+        };
+
+        $next = function () use (&$tasks, $taskCallback, $errback, $done) {
+            if (0 === count($tasks)) {
+                call_user_func_array($done, func_get_args());
+                return;
+            }
+
+            $task = array_shift($tasks);
+            $args = array_merge(func_get_args(), array($taskCallback, $errback));
+            call_user_func_array($task, $args);
+        };
+
+        $next();
+    }
 }
