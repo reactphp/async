@@ -3,11 +3,18 @@
     "packages": [
 
     ],
-    "packages-dev": null,
+    "packages-dev": [
+        {
+            "package": "react/event-loop",
+            "version": "dev-master",
+            "source-reference": "0927a2129394f10cc8534994271c6073ca9e350c",
+            "commit-date": "1337810634"
+        }
+    ],
     "aliases": [
 
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "stability-flags": {
         "react/event-loop": 20
     }
