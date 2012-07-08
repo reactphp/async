@@ -4,7 +4,7 @@ namespace React\Async;
 
 class Util
 {
-    public static function series($tasks, $callback, $errback)
+    public static function series($tasks, $callback = null, $errback = null)
     {
         $results = array();
 
@@ -14,7 +14,9 @@ class Util
         };
 
         $done = function () use (&$results, $callback) {
-            call_user_func($callback, $results);
+            if ($callback) {
+                call_user_func($callback, $results);
+            }
         };
 
         $next = function () use (&$tasks, $taskCallback, $errback, $done) {
@@ -30,7 +32,7 @@ class Util
         $next();
     }
 
-    public static function parallel($tasks, $callback, $errback)
+    public static function parallel($tasks, $callback = null, $errback = null)
     {
         $results = array();
         $errors = array();
@@ -41,6 +43,10 @@ class Util
         };
 
         $done = function () use (&$results, &$errors, $callback, $errback) {
+            if (!$callback) {
+                return;
+            }
+
             if (count($errors)) {
                 $errback(array_shift($errors));
                 return;
@@ -72,14 +78,16 @@ class Util
         }
     }
 
-    public static function waterfall($tasks, $callback, $errback)
+    public static function waterfall($tasks, $callback = null, $errback = null)
     {
         $taskCallback = function () use (&$next) {
             call_user_func_array($next, func_get_args());
         };
 
         $done = function () use ($callback) {
-            call_user_func_array($callback, func_get_args());
+            if ($callback) {
+                call_user_func_array($callback, func_get_args());
+            }
         };
 
         $next = function () use (&$tasks, $taskCallback, $errback, $done) {
