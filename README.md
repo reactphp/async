@@ -20,12 +20,16 @@ The recommended way to install react/async is [through composer](http://getcompo
 
 ## Example
 
+### Parallel
+
 ```php
 <?php
 
+use React\Async\Util as Async;
+
 $loop = React\EventLoop\Factory::create();
 
-React\Async\Util::parallel(
+Async::parallel(
     array(
         function ($callback, $errback) use ($loop) {
             $loop->addTimer(1, function () use ($callback) {
@@ -52,6 +56,39 @@ React\Async\Util::parallel(
         throw $e;
     }
 );
+
+$loop->run();
+```
+
+### Waterfall
+
+```php
+<?php
+
+use React\Async\Util as Async;
+
+$loop = React\EventLoop\Factory::create();
+
+$addOne = function ($prev, $callback = null) use ($loop) {
+    if (!$callback) {
+        $callback = $prev;
+        $prev = 0;
+    }
+
+    $loop->addTimer(1, function () use ($prev, $callback) {
+        $callback($prev + 1);
+    });
+};
+
+Async::waterfall(array(
+    $addOne,
+    $addOne,
+    $addOne,
+    function ($prev, $callback) use ($loop) {
+        echo "Final result is $prev\n";
+        $callback();
+    },
+));
 
 $loop->run();
 ```
