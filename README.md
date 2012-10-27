@@ -4,7 +4,7 @@ Async utilities for React.
 
 It is heavily influenced by [async.js](https://github.com/caolan/async).
 
-[![Build Status](https://secure.travis-ci.org/react-php/async.png?branch=master)](http://travis-ci.org/react-php/async)
+[![Build Status](https://secure.travis-ci.org/reactphp/async.png?branch=master)](http://travis-ci.org/react-php/async)
 
 ## Install
 
