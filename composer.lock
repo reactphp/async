@@ -1,21 +1,58 @@
 {
-    "hash": "b20b1c26a42a1a7a70b73224c4d3134f",
+    "hash": "ff0a8c99cd424aa3e4d1cad0c54de1cd",
     "packages": [
 
     ],
     "packages-dev": [
         {
-            "package": "react/event-loop",
-            "version": "dev-master",
-            "source-reference": "0927a2129394f10cc8534994271c6073ca9e350c",
-            "commit-date": "1337810634"
+            "name": "react/event-loop",
+            "version": "v0.2.7",
+            "target-dir": "React/EventLoop",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/reactphp/event-loop",
+                "reference": "v0.2.7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/reactphp/event-loop/archive/v0.2.7.zip",
+                "reference": "v0.2.7",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "suggest": {
+                "ext-libev": "*",
+                "ext-libevent": ">=0.0.5"
+            },
+            "time": "2013-01-05 11:41:26",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "0.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "React\\EventLoop": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Event loop abstraction layer that libraries can use for evented I/O.",
+            "keywords": [
+                "event-loop"
+            ]
         }
     ],
     "aliases": [
 
     ],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "react/event-loop": 20
-    }
+    "stability-flags": [
+
+    ]
 }
