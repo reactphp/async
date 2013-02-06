@@ -13,7 +13,7 @@ The recommended way to install react/async is [through composer](http://getcompo
 ```JSON
 {
     "require": {
-        "react/async": "dev-master"
+        "react/async": "~1.0"
     }
 }
 ```
