@@ -6,9 +6,23 @@ It is heavily influenced by [async.js](https://github.com/caolan/async).
 
 [![Build Status](https://secure.travis-ci.org/reactphp/async.png?branch=master)](http://travis-ci.org/reactphp/async)
 
+## About
+
+This library allows you to manage async control flow. It provides a number of
+combinators for continuation-passing style (aka callbacks). Instead of nesting
+those callbacks, you can declare them as a list, which is resolved
+sequentially in an async manner.
+
+React/Async will not automagically change blocking code to be async. You need
+to have an actual event loop and non-blocking libraries interacting with that
+event loop for it to work. You can use `react/event-loop` for this, but you
+don't have to. As long as you have a callback-based API, it can be used with
+this library.
+
 ## Install
 
-The recommended way to install react/async is [through composer](http://getcomposer.org).
+The recommended way to install react/async is [through
+composer](http://getcomposer.org).
 
 ```JSON
 {
