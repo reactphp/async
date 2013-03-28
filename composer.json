@@ -9,6 +9,9 @@
     "require-dev": {
         "react/event-loop": "0.2.*"
     },
+    "suggest": {
+        "react/event-loop": "You need some kind of event loop for this to make sense."
+    },
     "autoload": {
         "psr-0": { "React\\Async": "src" }
     },

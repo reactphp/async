@@ -1,5 +1,5 @@
 {
-    "hash": "ff0a8c99cd424aa3e4d1cad0c54de1cd",
+    "hash": "b960de93e5fdde7636532a3c5c3bf373",
     "packages": [
 
     ],
@@ -26,7 +26,6 @@
                 "ext-libev": "*",
                 "ext-libevent": ">=0.0.5"
             },
-            "time": "2013-01-05 11:41:26",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -45,7 +44,8 @@
             "description": "Event loop abstraction layer that libraries can use for evented I/O.",
             "keywords": [
                 "event-loop"
-            ]
+            ],
+            "time": "2013-01-05 11:41:26"
         }
     ],
     "aliases": [
@@ -53,6 +53,12 @@
     ],
     "minimum-stability": "stable",
     "stability-flags": [
+
+    ],
+    "platform": {
+        "php": ">=5.3.2"
+    },
+    "platform-dev": [
 
     ]
 }
