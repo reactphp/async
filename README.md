@@ -16,8 +16,11 @@ sequentially in an async manner.
 React/Async will not automagically change blocking code to be async. You need
 to have an actual event loop and non-blocking libraries interacting with that
 event loop for it to work. You can use `react/event-loop` for this, but you
-don't have to. As long as you have a callback-based API, it can be used with
-this library.
+don't have to. As long as you have a callback-based API that runs in an event
+loop, it can be used with this library.
+
+*You must be running inside an event loop for react/async to make any sense
+whatsoever!*
 
 ## Install
 
