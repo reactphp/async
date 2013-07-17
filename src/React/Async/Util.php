@@ -63,16 +63,13 @@ class Util
             return;
         }
 
-        $checkDone = function () use (&$results, &$errors, $numTasks, $done) {
-            if ($numTasks === count($results) + count($errors)) {
-                $done();
-            }
-        };
-
         foreach ($tasks as $i => $task) {
-            $taskCallback = function ($result) use (&$results, $i, $checkDone) {
+            $taskCallback = function ($result) use (&$results, &$errors, $i, $checkDone, $numTasks, $done) {
                 $results[$i] = $result;
-                $checkDone();
+
+                if ($numTasks === count($results) + count($errors)) {
+                    $done();
+                }
             };
 
             call_user_func($task, $taskCallback, $taskErrback);
