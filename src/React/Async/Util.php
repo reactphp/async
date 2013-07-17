@@ -38,11 +38,6 @@ class Util
         $results = array();
         $errors = array();
 
-        $taskErrback = function ($error) use (&$errors, &$checkDone) {
-            $errors[] = $error;
-            $checkDone();
-        };
-
         $done = function () use (&$results, &$errors, $callback, $errback) {
             if (!$callback) {
                 return;
@@ -63,13 +58,21 @@ class Util
             return;
         }
 
-        foreach ($tasks as $i => $task) {
-            $taskCallback = function ($result) use (&$results, &$errors, $i, $checkDone, $numTasks, $done) {
-                $results[$i] = $result;
+        $checkDone = function($results, $errors) use ($numTasks, $done) {
+            if ($numTasks === count($results) + count($errors)) {
+                $done();
+            }
+        };
 
-                if ($numTasks === count($results) + count($errors)) {
-                    $done();
-                }
+        foreach ($tasks as $i => $task) {
+            $taskCallback = function ($result) use (&$results, &$errors, $i, $checkDone) {
+                $results[$i] = $result;
+                $checkDone($results, $errors);
+            };
+
+            $taskErrback = function ($error) use (&$results, &$errors, $i, $checkDone) {
+                $errors[$i] = $error;
+                $checkDone($results, $errors);
             };
 
             call_user_func($task, $taskCallback, $taskErrback);
