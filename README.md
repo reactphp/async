@@ -1,3 +1,5 @@
+# NOTE: This package is no longer maintained. Use [react/promise](https://github.com/reactphp/promise) instead!
+
 # React/Async
 
 Async utilities for React.
