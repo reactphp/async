@@ -34,7 +34,6 @@ class Util
 
     public static function parallel($tasks, $callback = null, $errback = null)
     {
-        // Shut up Phil
         $results = array();
         $errors = array();
 
