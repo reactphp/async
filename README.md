@@ -75,8 +75,8 @@ Once the promise is fulfilled, this function will return whatever the promise
 resolved to.
 
 Once the promise is rejected, this will throw whatever the promise rejected
-with. If the promise did not reject with an `Exception` or `Throwable` (PHP 7+),
-then this function will throw an `UnexpectedValueException` instead.
+with. If the promise did not reject with an `Exception` or `Throwable`, then
+this function will throw an `UnexpectedValueException` instead.
 
 ```php
 try {
@@ -222,8 +222,14 @@ $ composer require react/async:dev-main
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
 
 This project aims to run on any platform and thus does not require any PHP
-extensions and supports running on legacy PHP 5.3 through current PHP 8+.
+extensions and supports running on PHP 7.1 through current PHP 8+.
 It's *highly recommended to use the latest supported PHP version* for this project.
+
+We're committed to providing long-term support (LTS) options and to provide a
+smooth upgrade path. If you're using an older PHP version, you may use the
+[`2.x` branch](https://github.com/reactphp/async/tree/2.x) which provides a
+compatible API but does not take advantage of newer language features. You may
+target both versions at the same time to support a wider range of PHP versions.
 
 ## Tests
 

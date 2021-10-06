@@ -28,8 +28,8 @@ use React\Promise\PromiseInterface;
  * resolved to.
  *
  * Once the promise is rejected, this will throw whatever the promise rejected
- * with. If the promise did not reject with an `Exception` or `Throwable` (PHP 7+),
- * then this function will throw an `UnexpectedValueException` instead.
+ * with. If the promise did not reject with an `Exception` or `Throwable`, then
+ * this function will throw an `UnexpectedValueException` instead.
  *
  * ```php
  * try {
@@ -45,7 +45,7 @@ use React\Promise\PromiseInterface;
  * @param PromiseInterface $promise
  * @return mixed returns whatever the promise resolves to
  * @throws \Exception when the promise is rejected with an `Exception`
- * @throws \Throwable when the promise is rejected with a `Throwable` (PHP 7+)
+ * @throws \Throwable when the promise is rejected with a `Throwable`
  * @throws \UnexpectedValueException when the promise is rejected with an unexpected value (Promise API v1 or v2 only)
  */
 function await(PromiseInterface $promise)
@@ -79,7 +79,7 @@ function await(PromiseInterface $promise)
 
     if ($rejected) {
         // promise is rejected with an unexpected value (Promise API v1 or v2 only)
-        if (!$exception instanceof \Exception && !$exception instanceof \Throwable) {
+        if (!$exception instanceof \Throwable) {
             $exception = new \UnexpectedValueException(
                 'Promise rejected with unexpected value of type ' . (is_object($exception) ? get_class($exception) : gettype($exception))
             );
@@ -95,18 +95,18 @@ function await(PromiseInterface $promise)
  * @param array<callable():PromiseInterface<mixed,Exception>> $tasks
  * @return PromiseInterface<array<mixed>,Exception>
  */
-function parallel(array $tasks)
+function parallel(array $tasks): PromiseInterface
 {
-    $pending = array();
+    $pending = [];
     $deferred = new Deferred(function () use (&$pending) {
         foreach ($pending as $promise) {
             if ($promise instanceof CancellablePromiseInterface) {
                 $promise->cancel();
             }
         }
-        $pending = array();
+        $pending = [];
     });
-    $results = array();
+    $results = [];
     $errored = false;
 
     $numTasks = count($tasks);
@@ -123,7 +123,7 @@ function parallel(array $tasks)
                 $promise->cancel();
             }
         }
-        $pending = array();
+        $pending = [];
     };
 
     foreach ($tasks as $i => $task) {
@@ -153,7 +153,7 @@ function parallel(array $tasks)
  * @param array<callable():PromiseInterface<mixed,Exception>> $tasks
  * @return PromiseInterface<array<mixed>,Exception>
  */
-function series(array $tasks)
+function series(array $tasks): PromiseInterface
 {
     $pending = null;
     $deferred = new Deferred(function () use (&$pending) {
@@ -162,7 +162,7 @@ function series(array $tasks)
         }
         $pending = null;
     });
-    $results = array();
+    $results = [];
 
     /** @var callable():void $next */
     $taskCallback = function ($result) use (&$results, &$next) {
@@ -193,7 +193,7 @@ function series(array $tasks)
  * @param array<callable(mixed=):PromiseInterface<mixed,Exception>> $tasks
  * @return PromiseInterface<mixed,Exception>
  */
-function waterfall(array $tasks)
+function waterfall(array $tasks): PromiseInterface
 {
     $pending = null;
     $deferred = new Deferred(function () use (&$pending) {

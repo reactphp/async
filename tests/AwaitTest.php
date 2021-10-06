@@ -46,9 +46,6 @@ class AwaitTest extends TestCase
         React\Async\await($promise);
     }
 
-    /**
-     * @requires PHP 7
-     */
     public function testAwaitThrowsErrorWhenPromiseIsRejectedWithError()
     {
         $promise = new Promise(function ($_, $reject) {
@@ -84,8 +81,8 @@ class AwaitTest extends TestCase
 
     public function testAwaitShouldNotCreateAnyGarbageReferencesForResolvedPromise()
     {
-        if (class_exists('React\Promise\When') && PHP_VERSION_ID >= 50400) {
-            $this->markTestSkipped('Not supported on legacy Promise v1 API with PHP 5.4+');
+        if (class_exists('React\Promise\When')) {
+            $this->markTestSkipped('Not supported on legacy Promise v1 API');
         }
 
         gc_collect_cycles();
@@ -126,8 +123,8 @@ class AwaitTest extends TestCase
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');
         }
 
-        if (class_exists('React\Promise\When') && PHP_VERSION_ID >= 50400) {
-            $this->markTestSkipped('Not supported on legacy Promise v1 API with PHP 5.4+');
+        if (class_exists('React\Promise\When')) {
+            $this->markTestSkipped('Not supported on legacy Promise v1 API');
         }
 
         gc_collect_cycles();
