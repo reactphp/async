@@ -6,7 +6,7 @@ Async utilities for React.
 
 It is heavily influenced by [async.js](https://github.com/caolan/async).
 
-[![Build Status](https://secure.travis-ci.org/reactphp/async.png?branch=master)](http://travis-ci.org/reactphp/async)
+[![CI status](https://github.com/reactphp/async/workflows/CI/badge.svg)](https://github.com/reactphp/async/actions)
 
 ## About
 
@@ -118,9 +118,18 @@ $loop->run();
 
 ## Tests
 
-To run the test suite, you need PHPUnit.
+To run the test suite, you first need to clone this repo and then install all
+dependencies [through Composer](https://getcomposer.org/):
 
-    $ phpunit
+```bash
+$ composer install
+```
+
+To run the test suite, go to the project root and run:
+
+```bash
+$ php vendor/bin/phpunit
+```
 
 ## License
 

@@ -6,7 +6,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
 {
     protected function createCallableMock($expects, $with = null)
     {
-        $callable = $this->getMock('React\Tests\Async\CallableStub');
+        $callable = $this->getMockBuilder('React\Tests\Async\CallableStub')->getMock();
 
         $method = $callable
             ->expects($expects)
