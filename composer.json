@@ -36,7 +36,10 @@
         "react/event-loop": "You need some kind of event loop for this to make sense."
     },
     "autoload": {
-        "psr-0": { "React\\Async": "src" }
+        "psr-4": { "React\\Async\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "React\\Tests\\Async\\": "tests/" }
     },
     "extra": {
         "branch-alias": {
