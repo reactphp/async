@@ -1,8 +1,30 @@
 {
     "name": "react/async",
-    "description": "Async utilities for React.",
-    "keywords": ["async"],
+    "description": "Async utilities for ReactPHP",
+    "keywords": ["async", "ReactPHP"],
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Christian Lück",
+            "homepage": "https://clue.engineering/",
+            "email": "christian@clue.engineering"
+        },
+        {
+            "name": "Cees-Jan Kiewiet",
+            "homepage": "https://wyrihaximus.net/",
+            "email": "reactphp@ceesjankiewiet.nl"
+        },
+        {
+            "name": "Jan Sorgalla",
+            "homepage": "https://sorgalla.com/",
+            "email": "jsorgalla@gmail.com"
+        },
+        {
+            "name": "Chris Boden",
+            "homepage": "https://cboden.dev/",
+            "email": "cboden@gmail.com"
+        }
+    ],
     "require": {
         "php": ">=5.3.2"
     },
@@ -14,7 +36,10 @@
         "react/event-loop": "You need some kind of event loop for this to make sense."
     },
     "autoload": {
-        "psr-0": { "React\\Async": "src" }
+        "psr-4": { "React\\Async\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "React\\Tests\\Async\\": "tests/" }
     },
     "extra": {
         "branch-alias": {
