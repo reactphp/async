@@ -2,10 +2,10 @@
 
 namespace React\Tests\Async;
 
-use React\Async\Util;
+use React;
 use React\EventLoop\Loop;
 
-class UtilParallelTest extends TestCase
+class ParallelTest extends TestCase
 {
     public function testParallelWithoutTasks()
     {
@@ -14,7 +14,7 @@ class UtilParallelTest extends TestCase
         $callback = $this->expectCallableOnceWith(array());
         $errback = $this->expectCallableNever();
 
-        Util::parallel($tasks, $callback, $errback);
+        React\Async\parallel($tasks, $callback, $errback);
     }
 
     public function testParallelWithTasks()
@@ -35,7 +35,7 @@ class UtilParallelTest extends TestCase
         $callback = $this->expectCallableOnceWith(array('foo', 'bar'));
         $errback = $this->expectCallableNever();
 
-        Util::parallel($tasks, $callback, $errback);
+        React\Async\parallel($tasks, $callback, $errback);
 
         $timer = new Timer($this);
         $timer->start();
@@ -68,7 +68,7 @@ class UtilParallelTest extends TestCase
         $callback = $this->expectCallableNever();
         $errback = $this->expectCallableOnce();
 
-        Util::parallel($tasks, $callback, $errback);
+        React\Async\parallel($tasks, $callback, $errback);
 
         $this->assertSame(2, $called);
     }
@@ -97,7 +97,7 @@ class UtilParallelTest extends TestCase
         $callback = $this->expectCallableNever();
         $errback = $this->expectCallableOnce();
 
-        Util::parallel($tasks, $callback, $errback);
+        React\Async\parallel($tasks, $callback, $errback);
 
         Loop::run();
 

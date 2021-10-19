@@ -2,10 +2,10 @@
 
 namespace React\Tests\Async;
 
-use React\Async\Util;
+use React;
 use React\EventLoop\Loop;
 
-class UtilSeriesTest extends TestCase
+class SeriesTest extends TestCase
 {
     public function testSeriesWithoutTasks()
     {
@@ -14,7 +14,7 @@ class UtilSeriesTest extends TestCase
         $callback = $this->expectCallableOnceWith(array());
         $errback = $this->expectCallableNever();
 
-        Util::series($tasks, $callback, $errback);
+        React\Async\series($tasks, $callback, $errback);
     }
 
     public function testSeriesWithTasks()
@@ -35,7 +35,7 @@ class UtilSeriesTest extends TestCase
         $callback = $this->expectCallableOnceWith(array('foo', 'bar'));
         $errback = $this->expectCallableNever();
 
-        Util::series($tasks, $callback, $errback);
+        React\Async\series($tasks, $callback, $errback);
 
         $timer = new Timer($this);
         $timer->start();
@@ -68,7 +68,7 @@ class UtilSeriesTest extends TestCase
         $callback = $this->expectCallableNever();
         $errback = $this->expectCallableOnce();
 
-        Util::series($tasks, $callback, $errback);
+        React\Async\series($tasks, $callback, $errback);
 
         $this->assertSame(1, $called);
     }

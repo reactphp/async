@@ -25,8 +25,8 @@ whatsoever!*
 **Table of Contents**
 
 * [Usage](#usage)
-    * [Parallel](#parallel)
-    * [Waterfall](#waterfall)
+    * [parallel()](#parallel)
+    * [waterfall()](#waterfall)
 * [Todo](#todo)
 * [Install](#install)
 * [Tests](#tests)
@@ -34,15 +34,39 @@ whatsoever!*
 
 ## Usage
 
-### Parallel
+This lightweight library consists only of a few simple functions.
+All functions reside under the `React\Async` namespace.
+
+The below examples refer to all functions with their fully-qualified names like this:
+
+```php
+React\Async\parallel(…);
+```
+
+As of PHP 5.6+ you can also import each required function into your code like this:
+
+```php
+use function React\Async\parallel;
+
+parallel(…);
+```
+
+Alternatively, you can also use an import statement similar to this:
+
+```php
+use React\Async;
+
+Async\parallel(…);
+```
+
+### parallel()
 
 ```php
 <?php
 
-use React\Async\Util as Async;
 use React\EventLoop\Loop;
 
-Async::parallel(
+React\Async\parallel(
     array(
         function ($callback, $errback) {
             Loop::addTimer(1, function () use ($callback) {
@@ -71,12 +95,11 @@ Async::parallel(
 );
 ```
 
-### Waterfall
+### waterfall()
 
 ```php
 <?php
 
-use React\Async\Util as Async;
 use React\EventLoop\Loop;
 
 $addOne = function ($prev, $callback = null) {
@@ -90,7 +113,7 @@ $addOne = function ($prev, $callback = null) {
     });
 };
 
-Async::waterfall(array(
+React\Async\waterfall(array(
     $addOne,
     $addOne,
     $addOne,

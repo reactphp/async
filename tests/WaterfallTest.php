@@ -2,10 +2,10 @@
 
 namespace React\Tests\Async;
 
-use React\Async\Util;
+use React;
 use React\EventLoop\Loop;
 
-class UtilWaterfallTest extends TestCase
+class WaterfallTest extends TestCase
 {
     public function testWaterfallWithoutTasks()
     {
@@ -14,7 +14,7 @@ class UtilWaterfallTest extends TestCase
         $callback = $this->expectCallableOnce();
         $errback = $this->expectCallableNever();
 
-        Util::waterfall($tasks, $callback, $errback);
+        React\Async\waterfall($tasks, $callback, $errback);
     }
 
     public function testWaterfallWithTasks()
@@ -40,7 +40,7 @@ class UtilWaterfallTest extends TestCase
         $callback = $this->expectCallableOnceWith('foobarbaz');
         $errback = $this->expectCallableNever();
 
-        Util::waterfall($tasks, $callback, $errback);
+        React\Async\waterfall($tasks, $callback, $errback);
 
         $timer = new Timer($this);
         $timer->start();
@@ -73,7 +73,7 @@ class UtilWaterfallTest extends TestCase
         $callback = $this->expectCallableNever();
         $errback = $this->expectCallableOnce();
 
-        Util::waterfall($tasks, $callback, $errback);
+        React\Async\waterfall($tasks, $callback, $errback);
 
         $this->assertSame(1, $called);
     }
