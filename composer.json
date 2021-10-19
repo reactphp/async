@@ -1,8 +1,30 @@
 {
     "name": "react/async",
-    "description": "Async utilities for React.",
-    "keywords": ["async"],
+    "description": "Async utilities for ReactPHP",
+    "keywords": ["async", "ReactPHP"],
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Christian Lück",
+            "homepage": "https://clue.engineering/",
+            "email": "christian@clue.engineering"
+        },
+        {
+            "name": "Cees-Jan Kiewiet",
+            "homepage": "https://wyrihaximus.net/",
+            "email": "reactphp@ceesjankiewiet.nl"
+        },
+        {
+            "name": "Jan Sorgalla",
+            "homepage": "https://sorgalla.com/",
+            "email": "jsorgalla@gmail.com"
+        },
+        {
+            "name": "Chris Boden",
+            "homepage": "https://cboden.dev/",
+            "email": "cboden@gmail.com"
+        }
+    ],
     "require": {
         "php": ">=5.3.2"
     },

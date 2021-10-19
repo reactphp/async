@@ -1,8 +1,8 @@
 # NOTE: This package is no longer maintained. Use [react/promise](https://github.com/reactphp/promise) instead!
 
-# React/Async
+# Async
 
-Async utilities for React.
+Async utilities for [ReactPHP](https://reactphp.org/).
 
 It is heavily influenced by [async.js](https://github.com/caolan/async).
 
@@ -133,4 +133,4 @@ $ php vendor/bin/phpunit
 
 ## License
 
-MIT, see LICENSE.
+MIT, see [LICENSE file](LICENSE).
