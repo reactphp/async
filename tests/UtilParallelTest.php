@@ -3,6 +3,7 @@
 namespace React\Tests\Async;
 
 use React\Async\Util;
+use React\EventLoop\Loop;
 
 class UtilParallelTest extends TestCase
 {
@@ -18,16 +19,14 @@ class UtilParallelTest extends TestCase
 
     public function testParallelWithTasks()
     {
-        $loop = new \React\EventLoop\StreamSelectLoop();
-
         $tasks = array(
-            function ($callback, $errback) use ($loop) {
-                $loop->addTimer(0.1, function () use ($callback) {
+            function ($callback, $errback) {
+                Loop::addTimer(0.1, function () use ($callback) {
                     $callback('foo');
                 });
             },
-            function ($callback, $errback) use ($loop) {
-                $loop->addTimer(0.1, function () use ($callback) {
+            function ($callback, $errback) {
+                Loop::addTimer(0.1, function () use ($callback) {
                     $callback('bar');
                 });
             },
@@ -41,7 +40,7 @@ class UtilParallelTest extends TestCase
         $timer = new Timer($this);
         $timer->start();
 
-        $loop->run();
+        Loop::run();
 
         $timer->stop();
         $timer->assertInRange(0.1, 0.2);
@@ -78,15 +77,13 @@ class UtilParallelTest extends TestCase
     {
         $called = 0;
 
-        $loop = new \React\EventLoop\StreamSelectLoop();
-
         $tasks = array(
             function ($callback, $errback) use (&$called) {
                 $callback('foo');
                 $called++;
             },
-            function ($callback, $errback) use ($loop) {
-                $loop->addTimer(0.001, function () use ($errback) {
+            function ($callback, $errback) {
+                Loop::addTimer(0.001, function () use ($errback) {
                     $e = new \RuntimeException('whoops');
                     $errback($e);
                 });
@@ -102,7 +99,7 @@ class UtilParallelTest extends TestCase
 
         Util::parallel($tasks, $callback, $errback);
 
-        $loop->run();
+        Loop::run();
 
         $this->assertSame(2, $called);
     }
