@@ -2,27 +2,49 @@
 
 namespace React\Tests\Async;
 
-class TestCase extends \PHPUnit_Framework_TestCase
-{
-    protected function createCallableMock($expects, $with = null)
-    {
-        $callable = $this->getMockBuilder('React\Tests\Async\CallableStub')->getMock();
+use PHPUnit\Framework\TestCase as BaseTestCase;
 
-        $method = $callable
-            ->expects($expects)
+class TestCase extends BaseTestCase
+{
+    protected function expectCallableOnce()
+    {
+        $mock = $this->createCallableMock();
+        $mock
+            ->expects($this->once())
             ->method('__invoke');
 
-        if ($with) {
-            $method->with($with);
-        }
-
-        return $callable;
+        return $mock;
     }
-}
 
-class CallableStub
-{
-    public function __invoke()
+    protected function expectCallableOnceWith($value)
     {
+        $mock = $this->createCallableMock();
+        $mock
+            ->expects($this->once())
+            ->method('__invoke')
+            ->with($value);
+
+        return $mock;
+    }
+
+    protected function expectCallableNever()
+    {
+        $mock = $this->createCallableMock();
+        $mock
+            ->expects($this->never())
+            ->method('__invoke');
+
+        return $mock;
+    }
+
+    protected function createCallableMock()
+    {
+        if (method_exists('PHPUnit\Framework\MockObject\MockBuilder', 'addMethods')) {
+            // PHPUnit 9+
+            return $this->getMockBuilder('stdClass')->addMethods(array('__invoke'))->getMock();
+        } else {
+            // legacy PHPUnit 4 - PHPUnit 8
+            return $this->getMockBuilder('stdClass')->setMethods(array('__invoke'))->getMock();
+        }
     }
 }

@@ -11,8 +11,8 @@ class UtilParallelTest extends TestCase
     {
         $tasks = array();
 
-        $callback = $this->createCallableMock($this->once(), array());
-        $errback = $this->createCallableMock($this->never());
+        $callback = $this->expectCallableOnceWith(array());
+        $errback = $this->expectCallableNever();
 
         Util::parallel($tasks, $callback, $errback);
     }
@@ -32,8 +32,8 @@ class UtilParallelTest extends TestCase
             },
         );
 
-        $callback = $this->createCallableMock($this->once(), array('foo', 'bar'));
-        $errback = $this->createCallableMock($this->never());
+        $callback = $this->expectCallableOnceWith(array('foo', 'bar'));
+        $errback = $this->expectCallableNever();
 
         Util::parallel($tasks, $callback, $errback);
 
@@ -65,8 +65,8 @@ class UtilParallelTest extends TestCase
             },
         );
 
-        $callback = $this->createCallableMock($this->never());
-        $errback = $this->createCallableMock($this->once());
+        $callback = $this->expectCallableNever();
+        $errback = $this->expectCallableOnce();
 
         Util::parallel($tasks, $callback, $errback);
 
@@ -94,8 +94,8 @@ class UtilParallelTest extends TestCase
             },
         );
 
-        $callback = $this->createCallableMock($this->never());
-        $errback = $this->createCallableMock($this->once());
+        $callback = $this->expectCallableNever();
+        $errback = $this->expectCallableOnce();
 
         Util::parallel($tasks, $callback, $errback);
 

@@ -11,8 +11,8 @@ class UtilSeriesTest extends TestCase
     {
         $tasks = array();
 
-        $callback = $this->createCallableMock($this->once(), array());
-        $errback = $this->createCallableMock($this->never());
+        $callback = $this->expectCallableOnceWith(array());
+        $errback = $this->expectCallableNever();
 
         Util::series($tasks, $callback, $errback);
     }
@@ -32,8 +32,8 @@ class UtilSeriesTest extends TestCase
             },
         );
 
-        $callback = $this->createCallableMock($this->once(), array('foo', 'bar'));
-        $errback = $this->createCallableMock($this->never());
+        $callback = $this->expectCallableOnceWith(array('foo', 'bar'));
+        $errback = $this->expectCallableNever();
 
         Util::series($tasks, $callback, $errback);
 
@@ -65,8 +65,8 @@ class UtilSeriesTest extends TestCase
             },
         );
 
-        $callback = $this->createCallableMock($this->never());
-        $errback = $this->createCallableMock($this->once());
+        $callback = $this->expectCallableNever();
+        $errback = $this->expectCallableOnce();
 
         Util::series($tasks, $callback, $errback);
 

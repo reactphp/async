@@ -8,8 +8,6 @@ It is heavily influenced by [async.js](https://github.com/caolan/async).
 
 [![CI status](https://github.com/reactphp/async/workflows/CI/badge.svg)](https://github.com/reactphp/async/actions)
 
-## About
-
 This library allows you to manage async control flow. It provides a number of
 combinators for continuation-passing style (aka callbacks). Instead of nesting
 those callbacks, you can declare them as a list, which is resolved
@@ -24,20 +22,17 @@ loop, it can be used with this library.
 *You must be running inside an event loop for react/async to make any sense
 whatsoever!*
 
-## Install
+**Table of Contents**
 
-The recommended way to install react/async is [through
-composer](http://getcomposer.org).
+* [Usage](#usage)
+    * [Parallel](#parallel)
+    * [Waterfall](#waterfall)
+* [Todo](#todo)
+* [Install](#install)
+* [Tests](#tests)
+* [License](#license)
 
-```JSON
-{
-    "require": {
-        "react/async": "~1.0"
-    }
-}
-```
-
-## Example
+## Usage
 
 ### Parallel
 
@@ -109,6 +104,24 @@ Async::waterfall(array(
 ## Todo
 
  * Implement queue()
+
+## Install
+
+The recommended way to install this library is [through Composer](https://getcomposer.org/).
+[New to Composer?](https://getcomposer.org/doc/00-intro.md)
+
+Once released, this project will follow [SemVer](https://semver.org/).
+At the moment, this will install the latest development version:
+
+```bash
+$ composer require react/async:dev-main
+```
+
+See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
+
+This project aims to run on any platform and thus does not require any PHP
+extensions and supports running on legacy PHP 5.3 through current PHP 8+.
+It's *highly recommended to use the latest supported PHP version* for this project.
 
 ## Tests
 
