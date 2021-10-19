@@ -2,15 +2,16 @@
 
 namespace React\Async;
 
-function parallel($tasks, $callback = null, $errback = null)
+/**
+ * @param array<callable> $tasks
+ * @param ?callable       $callback
+ * @param ?callable       $errback
+ * @return void
+ */
+function parallel(array $tasks, $callback = null, $errback = null)
 {
     $results = array();
     $errors = array();
-
-    $taskErrback = function ($error) use (&$errors, &$checkDone) {
-        $errors[] = $error;
-        $checkDone();
-    };
 
     $done = function () use (&$results, &$errors, $callback, $errback) {
         if (!$callback) {
@@ -38,6 +39,11 @@ function parallel($tasks, $callback = null, $errback = null)
         }
     };
 
+    $taskErrback = function ($error) use (&$errors, $checkDone) {
+        $errors[] = $error;
+        $checkDone();
+    };
+
     foreach ($tasks as $i => $task) {
         $taskCallback = function ($result) use (&$results, $i, $checkDone) {
             $results[$i] = $result;
@@ -48,10 +54,17 @@ function parallel($tasks, $callback = null, $errback = null)
     }
 }
 
-function series($tasks, $callback = null, $errback = null)
+/**
+ * @param array<callable> $tasks
+ * @param ?callable       $callback
+ * @param ?callable       $errback
+ * @return void
+ */
+function series(array $tasks, $callback = null, $errback = null)
 {
     $results = array();
 
+    /** @var callable():void $next */
     $taskCallback = function ($result) use (&$results, &$next) {
         $results[] = $result;
         $next();
@@ -76,7 +89,13 @@ function series($tasks, $callback = null, $errback = null)
     $next();
 }
 
-function waterfall($tasks, $callback = null, $errback = null)
+/**
+ * @param array<callable> $tasks
+ * @param ?callable       $callback
+ * @param ?callable       $errback
+ * @return void
+ */
+function waterfall(array $tasks, $callback = null, $errback = null)
 {
     $taskCallback = function () use (&$next) {
         call_user_func_array($next, func_get_args());

@@ -26,6 +26,7 @@ whatsoever!*
 
 * [Usage](#usage)
     * [parallel()](#parallel)
+    * [series()](#series)
     * [waterfall()](#waterfall)
 * [Todo](#todo)
 * [Install](#install)
@@ -61,6 +62,9 @@ Async\parallel(…);
 
 ### parallel()
 
+The `parallel(array<callable> $tasks, ?callable $callback = null, ?callable $errback = null): void` function can be used
+like this:
+
 ```php
 <?php
 
@@ -89,13 +93,55 @@ React\Async\parallel(
             var_dump($result);
         }
     },
-    function (\Exception $e) {
+    function (Exception $e) {
+        throw $e;
+    }
+);
+```
+
+### series()
+
+The `series(array<callable> $tasks, ?callable $callback = null, ?callable $errback = null): void` function can be used
+like this:
+
+```php
+<?php
+
+use React\EventLoop\Loop;
+
+React\Async\series(
+    array(
+        function ($callback, $errback) {
+            Loop::addTimer(1, function () use ($callback) {
+                $callback('Slept for a whole second');
+            });
+        },
+        function ($callback, $errback) {
+            Loop::addTimer(1, function () use ($callback) {
+                $callback('Slept for another whole second');
+            });
+        },
+        function ($callback, $errback) {
+            Loop::addTimer(1, function () use ($callback) {
+                $callback('Slept for yet another whole second');
+            });
+        },
+    ),
+    function (array $results) {
+        foreach ($results as $result) {
+            var_dump($result);
+        }
+    },
+    function (Exception $e) {
         throw $e;
     }
 );
 ```
 
 ### waterfall()
+
+The `waterfall(array<callable> $tasks, ?callable $callback = null, ?callable $errback = null): void` function can be used
+like this:
 
 ```php
 <?php
