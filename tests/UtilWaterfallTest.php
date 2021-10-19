@@ -11,8 +11,8 @@ class UtilWaterfallTest extends TestCase
     {
         $tasks = array();
 
-        $callback = $this->createCallableMock($this->once(), array());
-        $errback = $this->createCallableMock($this->never());
+        $callback = $this->expectCallableOnce();
+        $errback = $this->expectCallableNever();
 
         Util::waterfall($tasks, $callback, $errback);
     }
@@ -37,8 +37,8 @@ class UtilWaterfallTest extends TestCase
             },
         );
 
-        $callback = $this->createCallableMock($this->once(), 'foobarbaz');
-        $errback = $this->createCallableMock($this->never());
+        $callback = $this->expectCallableOnceWith('foobarbaz');
+        $errback = $this->expectCallableNever();
 
         Util::waterfall($tasks, $callback, $errback);
 
@@ -70,8 +70,8 @@ class UtilWaterfallTest extends TestCase
             },
         );
 
-        $callback = $this->createCallableMock($this->never());
-        $errback = $this->createCallableMock($this->once());
+        $callback = $this->expectCallableNever();
+        $errback = $this->expectCallableOnce();
 
         Util::waterfall($tasks, $callback, $errback);
 
