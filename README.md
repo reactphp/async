@@ -1,26 +1,17 @@
-# NOTE: This package is no longer maintained. Use [react/promise](https://github.com/reactphp/promise) instead!
-
 # Async
-
-Async utilities for [ReactPHP](https://reactphp.org/).
-
-It is heavily influenced by [async.js](https://github.com/caolan/async).
 
 [![CI status](https://github.com/reactphp/async/workflows/CI/badge.svg)](https://github.com/reactphp/async/actions)
 
-This library allows you to manage async control flow. It provides a number of
-combinators for continuation-passing style (aka callbacks). Instead of nesting
-those callbacks, you can declare them as a list, which is resolved
-sequentially in an async manner.
+Async utilities for [ReactPHP](https://reactphp.org/).
 
+This library allows you to manage async control flow. It provides a number of
+combinators for [Promise](https://github.com/reactphp/promise)-based APIs.
+Instead of nesting or chaining promise callbacks, you can declare them as a
+list, which is resolved sequentially in an async manner.
 React/Async will not automagically change blocking code to be async. You need
 to have an actual event loop and non-blocking libraries interacting with that
-event loop for it to work. You can use `react/event-loop` for this, but you
-don't have to. As long as you have a callback-based API that runs in an event
-loop, it can be used with this library.
-
-*You must be running inside an event loop for react/async to make any sense
-whatsoever!*
+event loop for it to work. As long as you have a Promise-based API that runs in
+an event loop, it can be used with this library.
 
 **Table of Contents**
 
@@ -62,112 +53,116 @@ Async\parallel(…);
 
 ### parallel()
 
-The `parallel(array<callable> $tasks, ?callable $callback = null, ?callable $errback = null): void` function can be used
+The `parallel(array<callable():PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<array<mixed>,Exception>` function can be used
 like this:
 
 ```php
 <?php
 
 use React\EventLoop\Loop;
+use React\Promise\Promise;
 
-React\Async\parallel(
-    array(
-        function ($callback, $errback) {
-            Loop::addTimer(1, function () use ($callback) {
-                $callback('Slept for a whole second');
+React\Async\parallel([
+    function () {
+        return new Promise(function ($resolve) {
+            Loop::addTimer(1, function () use ($resolve) {
+                $resolve('Slept for a whole second');
             });
-        },
-        function ($callback, $errback) {
-            Loop::addTimer(1, function () use ($callback) {
-                $callback('Slept for another whole second');
-            });
-        },
-        function ($callback, $errback) {
-            Loop::addTimer(1, function () use ($callback) {
-                $callback('Slept for yet another whole second');
-            });
-        },
-    ),
-    function (array $results) {
-        foreach ($results as $result) {
-            var_dump($result);
-        }
+        });
     },
-    function (Exception $e) {
-        throw $e;
+    function () {
+        return new Promise(function ($resolve) {
+            Loop::addTimer(1, function () use ($resolve) {
+                $resolve('Slept for another whole second');
+            });
+        });
+    },
+    function () {
+        return new Promise(function ($resolve) {
+            Loop::addTimer(1, function () use ($resolve) {
+                $resolve('Slept for yet another whole second');
+            });
+        });
+    },
+])->then(function (array $results) {
+    foreach ($results as $result) {
+        var_dump($result);
     }
-);
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
 ```
 
 ### series()
 
-The `series(array<callable> $tasks, ?callable $callback = null, ?callable $errback = null): void` function can be used
+The `series(array<callable():PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<array<mixed>,Exception>` function can be used
 like this:
 
 ```php
 <?php
 
 use React\EventLoop\Loop;
+use React\Promise\Promise;
 
-React\Async\series(
-    array(
-        function ($callback, $errback) {
-            Loop::addTimer(1, function () use ($callback) {
-                $callback('Slept for a whole second');
+React\Async\series([
+    function () {
+        return new Promise(function ($resolve) {
+            Loop::addTimer(1, function () use ($resolve) {
+                $resolve('Slept for a whole second');
             });
-        },
-        function ($callback, $errback) {
-            Loop::addTimer(1, function () use ($callback) {
-                $callback('Slept for another whole second');
-            });
-        },
-        function ($callback, $errback) {
-            Loop::addTimer(1, function () use ($callback) {
-                $callback('Slept for yet another whole second');
-            });
-        },
-    ),
-    function (array $results) {
-        foreach ($results as $result) {
-            var_dump($result);
-        }
+        });
     },
-    function (Exception $e) {
-        throw $e;
+    function () {
+        return new Promise(function ($resolve) {
+            Loop::addTimer(1, function () use ($resolve) {
+                $resolve('Slept for another whole second');
+            });
+        });
+    },
+    function () {
+        return new Promise(function ($resolve) {
+            Loop::addTimer(1, function () use ($resolve) {
+                $resolve('Slept for yet another whole second');
+            });
+        });
+    },
+])->then(function (array $results) {
+    foreach ($results as $result) {
+        var_dump($result);
     }
-);
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
 ```
 
 ### waterfall()
 
-The `waterfall(array<callable> $tasks, ?callable $callback = null, ?callable $errback = null): void` function can be used
+The `waterfall(array<callable(mixed=):PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<mixed,Exception>` function can be used
 like this:
 
 ```php
 <?php
 
 use React\EventLoop\Loop;
+use React\Promise\Promise;
 
-$addOne = function ($prev, $callback = null) {
-    if (!$callback) {
-        $callback = $prev;
-        $prev = 0;
-    }
-
-    Loop::addTimer(1, function () use ($prev, $callback) {
-        $callback($prev + 1);
+$addOne = function ($prev = 0) {
+    return new Promise(function ($resolve) use ($prev) {
+        Loop::addTimer(1, function () use ($prev, $resolve) {
+            $resolve($prev + 1);
+        });
     });
 };
 
-React\Async\waterfall(array(
+React\Async\waterfall([
     $addOne,
     $addOne,
-    $addOne,
-    function ($prev, $callback) use ($loop) {
-        echo "Final result is $prev\n";
-        $callback();
-    },
-));
+    $addOne
+])->then(function ($prev) {
+    echo "Final result is $prev\n";
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
 ```
 
 ## Todo
@@ -210,3 +205,5 @@ $ php vendor/bin/phpunit
 ## License
 
 MIT, see [LICENSE file](LICENSE).
+
+This project is heavily influenced by [async.js](https://github.com/caolan/async).

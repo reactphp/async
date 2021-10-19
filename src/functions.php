@@ -2,35 +2,32 @@
 
 namespace React\Async;
 
+use React\Promise\Deferred;
+use React\Promise\PromiseInterface;
+
 /**
- * @param array<callable> $tasks
- * @param ?callable       $callback
- * @param ?callable       $errback
- * @return void
+ * @param array<callable():PromiseInterface<mixed,Exception>> $tasks
+ * @return PromiseInterface<array<mixed>,Exception>
  */
-function parallel(array $tasks, $callback = null, $errback = null)
+function parallel(array $tasks)
 {
+    $deferred = new Deferred();
     $results = array();
     $errors = array();
 
-    $done = function () use (&$results, &$errors, $callback, $errback) {
-        if (!$callback) {
-            return;
-        }
-
+    $done = function () use (&$results, &$errors, $deferred) {
         if (count($errors)) {
-            $errback(array_shift($errors));
+            $deferred->reject(array_shift($errors));
             return;
         }
 
-        $callback($results);
+        $deferred->resolve($results);
     };
 
     $numTasks = count($tasks);
 
     if (0 === $numTasks) {
         $done();
-        return;
     }
 
     $checkDone = function () use (&$results, &$errors, $numTasks, $done) {
@@ -50,18 +47,22 @@ function parallel(array $tasks, $callback = null, $errback = null)
             $checkDone();
         };
 
-        call_user_func($task, $taskCallback, $taskErrback);
+        $promise = call_user_func($task);
+        assert($promise instanceof PromiseInterface);
+
+        $promise->then($taskCallback, $taskErrback);
     }
+
+    return $deferred->promise();
 }
 
 /**
- * @param array<callable> $tasks
- * @param ?callable       $callback
- * @param ?callable       $errback
- * @return void
+ * @param array<callable():PromiseInterface<mixed,Exception>> $tasks
+ * @return PromiseInterface<array<mixed>,Exception>
  */
-function series(array $tasks, $callback = null, $errback = null)
+function series(array $tasks)
 {
+    $deferred = new Deferred();
     $results = array();
 
     /** @var callable():void $next */
@@ -70,53 +71,47 @@ function series(array $tasks, $callback = null, $errback = null)
         $next();
     };
 
-    $done = function () use (&$results, $callback) {
-        if ($callback) {
-            call_user_func($callback, $results);
-        }
-    };
-
-    $next = function () use (&$tasks, $taskCallback, $errback, $done) {
+    $next = function () use (&$tasks, $taskCallback, $deferred, &$results) {
         if (0 === count($tasks)) {
-            $done();
+            $deferred->resolve($results);
             return;
         }
 
         $task = array_shift($tasks);
-        call_user_func($task, $taskCallback, $errback);
+        $promise = call_user_func($task);
+        assert($promise instanceof PromiseInterface);
+
+        $promise->then($taskCallback, array($deferred, 'reject'));
     };
 
     $next();
+
+    return $deferred->promise();
 }
 
 /**
- * @param array<callable> $tasks
- * @param ?callable       $callback
- * @param ?callable       $errback
- * @return void
+ * @param array<callable(mixed=):PromiseInterface<mixed,Exception>> $tasks
+ * @return PromiseInterface<mixed,Exception>
  */
-function waterfall(array $tasks, $callback = null, $errback = null)
+function waterfall(array $tasks)
 {
-    $taskCallback = function () use (&$next) {
-        call_user_func_array($next, func_get_args());
-    };
+    $deferred = new Deferred();
 
-    $done = function () use ($callback) {
-        if ($callback) {
-            call_user_func_array($callback, func_get_args());
-        }
-    };
-
-    $next = function () use (&$tasks, $taskCallback, $errback, $done) {
+    /** @var callable $next */
+    $next = function ($value = null) use (&$tasks, &$next, $deferred) {
         if (0 === count($tasks)) {
-            call_user_func_array($done, func_get_args());
+            $deferred->resolve($value);
             return;
         }
 
         $task = array_shift($tasks);
-        $args = array_merge(func_get_args(), array($taskCallback, $errback));
-        call_user_func_array($task, $args);
+        $promise = call_user_func_array($task, func_get_args());
+        assert($promise instanceof PromiseInterface);
+
+        $promise->then($next, array($deferred, 'reject'));
     };
 
     $next();
+
+    return $deferred->promise();
 }

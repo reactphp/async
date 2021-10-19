@@ -4,6 +4,7 @@ namespace React\Tests\Async;
 
 use React;
 use React\EventLoop\Loop;
+use React\Promise\Promise;
 
 class ParallelTest extends TestCase
 {
@@ -11,31 +12,33 @@ class ParallelTest extends TestCase
     {
         $tasks = array();
 
-        $callback = $this->expectCallableOnceWith(array());
-        $errback = $this->expectCallableNever();
+        $promise = React\Async\parallel($tasks);
 
-        React\Async\parallel($tasks, $callback, $errback);
+        $promise->then($this->expectCallableOnceWith(array()));
     }
 
     public function testParallelWithTasks()
     {
         $tasks = array(
-            function ($callback, $errback) {
-                Loop::addTimer(0.1, function () use ($callback) {
-                    $callback('foo');
+            function () {
+                return new Promise(function ($resolve) {
+                    Loop::addTimer(0.1, function () use ($resolve) {
+                        $resolve('foo');
+                    });
                 });
             },
-            function ($callback, $errback) {
-                Loop::addTimer(0.1, function () use ($callback) {
-                    $callback('bar');
+            function () {
+                return new Promise(function ($resolve) {
+                    Loop::addTimer(0.1, function () use ($resolve) {
+                        $resolve('bar');
+                    });
                 });
             },
         );
 
-        $callback = $this->expectCallableOnceWith(array('foo', 'bar'));
-        $errback = $this->expectCallableNever();
+        $promise = React\Async\parallel($tasks);
 
-        React\Async\parallel($tasks, $callback, $errback);
+        $promise->then($this->expectCallableOnceWith(array('foo', 'bar')));
 
         $timer = new Timer($this);
         $timer->start();
@@ -51,24 +54,28 @@ class ParallelTest extends TestCase
         $called = 0;
 
         $tasks = array(
-            function ($callback, $errback) use (&$called) {
-                $callback('foo');
+            function () use (&$called) {
                 $called++;
+                return new Promise(function ($resolve) {
+                    $resolve('foo');
+                });
             },
-            function ($callback, $errback) {
-                $e = new \RuntimeException('whoops');
-                $errback($e);
+            function () {
+                return new Promise(function () {
+                    throw new \RuntimeException('whoops');
+                });
             },
-            function ($callback, $errback) use (&$called) {
-                $callback('bar');
+            function () use (&$called) {
                 $called++;
+                return new Promise(function ($resolve) {
+                    $resolve('bar');
+                });
             },
         );
 
-        $callback = $this->expectCallableNever();
-        $errback = $this->expectCallableOnce();
+        $promise = React\Async\parallel($tasks);
 
-        React\Async\parallel($tasks, $callback, $errback);
+        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('whoops')));
 
         $this->assertSame(2, $called);
     }
@@ -78,26 +85,30 @@ class ParallelTest extends TestCase
         $called = 0;
 
         $tasks = array(
-            function ($callback, $errback) use (&$called) {
-                $callback('foo');
+            function () use (&$called) {
                 $called++;
-            },
-            function ($callback, $errback) {
-                Loop::addTimer(0.001, function () use ($errback) {
-                    $e = new \RuntimeException('whoops');
-                    $errback($e);
+                return new Promise(function ($resolve) {
+                    $resolve('foo');
                 });
             },
-            function ($callback, $errback) use (&$called) {
-                $callback('bar');
+            function () {
+                return new Promise(function ($_, $reject) {
+                    Loop::addTimer(0.001, function () use ($reject) {
+                        $reject(new \RuntimeException('whoops'));
+                    });
+                });
+            },
+            function () use (&$called) {
                 $called++;
+                return new Promise(function ($resolve) {
+                    $resolve('bar');
+                });
             },
         );
 
-        $callback = $this->expectCallableNever();
-        $errback = $this->expectCallableOnce();
+        $promise = React\Async\parallel($tasks);
 
-        React\Async\parallel($tasks, $callback, $errback);
+        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('whoops')));
 
         Loop::run();
 
