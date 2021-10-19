@@ -3,6 +3,7 @@
 namespace React\Tests\Async;
 
 use React\Async\Util;
+use React\EventLoop\Loop;
 
 class UtilWaterfallTest extends TestCase
 {
@@ -18,21 +19,19 @@ class UtilWaterfallTest extends TestCase
 
     public function testWaterfallWithTasks()
     {
-        $loop = new \React\EventLoop\StreamSelectLoop();
-
         $tasks = array(
-            function ($callback, $errback) use ($loop) {
-                $loop->addTimer(0.05, function () use ($callback) {
+            function ($callback, $errback) {
+                Loop::addTimer(0.05, function () use ($callback) {
                     $callback('foo');
                 });
             },
-            function ($foo, $callback, $errback) use ($loop) {
-                $loop->addTimer(0.05, function () use ($callback, $foo) {
+            function ($foo, $callback, $errback) {
+                Loop::addTimer(0.05, function () use ($callback, $foo) {
                     $callback($foo.'bar');
                 });
             },
-            function ($bar, $callback, $errback) use ($loop) {
-                $loop->addTimer(0.05, function () use ($callback, $bar) {
+            function ($bar, $callback, $errback) {
+                Loop::addTimer(0.05, function () use ($callback, $bar) {
                     $callback($bar.'baz');
                 });
             },
@@ -46,7 +45,7 @@ class UtilWaterfallTest extends TestCase
         $timer = new Timer($this);
         $timer->start();
 
-        $loop->run();
+        Loop::run();
 
         $timer->stop();
         $timer->assertInRange(0.15, 0.30);

@@ -45,23 +45,22 @@ composer](http://getcomposer.org).
 <?php
 
 use React\Async\Util as Async;
-
-$loop = React\EventLoop\Factory::create();
+use React\EventLoop\Loop;
 
 Async::parallel(
     array(
-        function ($callback, $errback) use ($loop) {
-            $loop->addTimer(1, function () use ($callback) {
+        function ($callback, $errback) {
+            Loop::addTimer(1, function () use ($callback) {
                 $callback('Slept for a whole second');
             });
         },
-        function ($callback, $errback) use ($loop) {
-            $loop->addTimer(1, function () use ($callback) {
+        function ($callback, $errback) {
+            Loop::addTimer(1, function () use ($callback) {
                 $callback('Slept for another whole second');
             });
         },
-        function ($callback, $errback) use ($loop) {
-            $loop->addTimer(1, function () use ($callback) {
+        function ($callback, $errback) {
+            Loop::addTimer(1, function () use ($callback) {
                 $callback('Slept for yet another whole second');
             });
         },
@@ -75,8 +74,6 @@ Async::parallel(
         throw $e;
     }
 );
-
-$loop->run();
 ```
 
 ### Waterfall
@@ -85,16 +82,15 @@ $loop->run();
 <?php
 
 use React\Async\Util as Async;
+use React\EventLoop\Loop;
 
-$loop = React\EventLoop\Factory::create();
-
-$addOne = function ($prev, $callback = null) use ($loop) {
+$addOne = function ($prev, $callback = null) {
     if (!$callback) {
         $callback = $prev;
         $prev = 0;
     }
 
-    $loop->addTimer(1, function () use ($prev, $callback) {
+    Loop::addTimer(1, function () use ($prev, $callback) {
         $callback($prev + 1);
     });
 };
@@ -108,8 +104,6 @@ Async::waterfall(array(
         $callback();
     },
 ));
-
-$loop->run();
 ```
 
 ## Todo

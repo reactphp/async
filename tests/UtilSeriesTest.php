@@ -3,6 +3,7 @@
 namespace React\Tests\Async;
 
 use React\Async\Util;
+use React\EventLoop\Loop;
 
 class UtilSeriesTest extends TestCase
 {
@@ -18,16 +19,14 @@ class UtilSeriesTest extends TestCase
 
     public function testSeriesWithTasks()
     {
-        $loop = new \React\EventLoop\StreamSelectLoop();
-
         $tasks = array(
-            function ($callback, $errback) use ($loop) {
-                $loop->addTimer(0.05, function () use ($callback) {
+            function ($callback, $errback) {
+                Loop::addTimer(0.05, function () use ($callback) {
                     $callback('foo');
                 });
             },
-            function ($callback, $errback) use ($loop) {
-                $loop->addTimer(0.05, function () use ($callback) {
+            function ($callback, $errback) {
+                Loop::addTimer(0.05, function () use ($callback) {
                     $callback('bar');
                 });
             },
@@ -41,7 +40,7 @@ class UtilSeriesTest extends TestCase
         $timer = new Timer($this);
         $timer->start();
 
-        $loop->run();
+        Loop::run();
 
         $timer->stop();
         $timer->assertInRange(0.10, 0.20);
