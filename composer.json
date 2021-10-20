@@ -36,7 +36,9 @@
         "react/event-loop": "You need an event loop for this to make sense."
     },
     "autoload": {
-        "psr-4": { "React\\Async\\": "src/" }
+        "files": [
+            "src/functions_include.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": { "React\\Tests\\Async\\": "tests/" }
