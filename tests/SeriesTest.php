@@ -4,6 +4,7 @@ namespace React\Tests\Async;
 
 use React;
 use React\EventLoop\Loop;
+use React\Promise\Promise;
 
 class SeriesTest extends TestCase
 {
@@ -11,31 +12,33 @@ class SeriesTest extends TestCase
     {
         $tasks = array();
 
-        $callback = $this->expectCallableOnceWith(array());
-        $errback = $this->expectCallableNever();
+        $promise = React\Async\series($tasks);
 
-        React\Async\series($tasks, $callback, $errback);
+        $promise->then($this->expectCallableOnceWith(array()));
     }
 
     public function testSeriesWithTasks()
     {
         $tasks = array(
-            function ($callback, $errback) {
-                Loop::addTimer(0.05, function () use ($callback) {
-                    $callback('foo');
+            function () {
+                return new Promise(function ($resolve) {
+                    Loop::addTimer(0.05, function () use ($resolve) {
+                        $resolve('foo');
+                    });
                 });
             },
-            function ($callback, $errback) {
-                Loop::addTimer(0.05, function () use ($callback) {
-                    $callback('bar');
+            function () {
+                return new Promise(function ($resolve) {
+                    Loop::addTimer(0.05, function () use ($resolve) {
+                        $resolve('bar');
+                    });
                 });
             },
         );
 
-        $callback = $this->expectCallableOnceWith(array('foo', 'bar'));
-        $errback = $this->expectCallableNever();
+        $promise = React\Async\series($tasks);
 
-        React\Async\series($tasks, $callback, $errback);
+        $promise->then($this->expectCallableOnceWith(array('foo', 'bar')));
 
         $timer = new Timer($this);
         $timer->start();
@@ -51,24 +54,28 @@ class SeriesTest extends TestCase
         $called = 0;
 
         $tasks = array(
-            function ($callback, $errback) use (&$called) {
-                $callback('foo');
+            function () use (&$called) {
                 $called++;
+                return new Promise(function ($resolve) {
+                    $resolve('foo');
+                });
             },
-            function ($callback, $errback) {
-                $e = new \RuntimeException('whoops');
-                $errback($e);
+            function () {
+                return new Promise(function () {
+                    throw new \RuntimeException('whoops');
+                });
             },
-            function ($callback, $errback) use (&$called) {
-                $callback('bar');
+            function () use (&$called) {
                 $called++;
+                return new Promise(function ($resolve) {
+                    $resolve('bar');
+                });
             },
         );
 
-        $callback = $this->expectCallableNever();
-        $errback = $this->expectCallableOnce();
+        $promise = React\Async\series($tasks);
 
-        React\Async\series($tasks, $callback, $errback);
+        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('whoops')));
 
         $this->assertSame(1, $called);
     }

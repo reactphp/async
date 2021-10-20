@@ -4,6 +4,7 @@ namespace React\Tests\Async;
 
 use React;
 use React\EventLoop\Loop;
+use React\Promise\Promise;
 
 class WaterfallTest extends TestCase
 {
@@ -11,36 +12,40 @@ class WaterfallTest extends TestCase
     {
         $tasks = array();
 
-        $callback = $this->expectCallableOnce();
-        $errback = $this->expectCallableNever();
+        $promise = React\Async\waterfall($tasks);
 
-        React\Async\waterfall($tasks, $callback, $errback);
+        $promise->then($this->expectCallableOnceWith(null));
     }
 
     public function testWaterfallWithTasks()
     {
         $tasks = array(
-            function ($callback, $errback) {
-                Loop::addTimer(0.05, function () use ($callback) {
-                    $callback('foo');
+            function ($foo = 'foo') {
+                return new Promise(function ($resolve) use ($foo) {
+                    Loop::addTimer(0.05, function () use ($resolve, $foo) {
+                        $resolve($foo);
+                    });
                 });
             },
-            function ($foo, $callback, $errback) {
-                Loop::addTimer(0.05, function () use ($callback, $foo) {
-                    $callback($foo.'bar');
+            function ($foo) {
+                return new Promise(function ($resolve) use ($foo) {
+                    Loop::addTimer(0.05, function () use ($resolve, $foo) {
+                        $resolve($foo . 'bar');
+                    });
                 });
             },
-            function ($bar, $callback, $errback) {
-                Loop::addTimer(0.05, function () use ($callback, $bar) {
-                    $callback($bar.'baz');
+            function ($bar) {
+                return new Promise(function ($resolve) use ($bar) {
+                    Loop::addTimer(0.05, function () use ($resolve, $bar) {
+                        $resolve($bar . 'baz');
+                    });
                 });
             },
         );
 
-        $callback = $this->expectCallableOnceWith('foobarbaz');
-        $errback = $this->expectCallableNever();
+        $promise = React\Async\waterfall($tasks);
 
-        React\Async\waterfall($tasks, $callback, $errback);
+        $promise->then($this->expectCallableOnceWith('foobarbaz'));
 
         $timer = new Timer($this);
         $timer->start();
@@ -56,24 +61,28 @@ class WaterfallTest extends TestCase
         $called = 0;
 
         $tasks = array(
-            function ($callback, $errback) use (&$called) {
-                $callback('foo');
+            function () use (&$called) {
                 $called++;
+                return new Promise(function ($resolve) {
+                    $resolve('foo');
+                });
             },
-            function ($foo, $callback, $errback) {
-                $e = new \RuntimeException('whoops');
-                $errback($e);
+            function ($foo) {
+                return new Promise(function () {
+                    throw new \RuntimeException('whoops');
+                });
             },
-            function ($callback, $errback) use (&$called) {
-                $callback('bar');
+            function () use (&$called) {
                 $called++;
+                return new Promise(function ($resolve) {
+                    $resolve('bar');
+                });
             },
         );
 
-        $callback = $this->expectCallableNever();
-        $errback = $this->expectCallableOnce();
+        $promise = React\Async\waterfall($tasks);
 
-        React\Async\waterfall($tasks, $callback, $errback);
+        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('whoops')));
 
         $this->assertSame(1, $called);
     }
