@@ -9,22 +9,12 @@ use React\Promise\Deferred;
 
 class AwaitTest extends TestCase
 {
-    protected $loop;
-
-    /**
-     * @before
-     */
-    public function setUpLoop()
-    {
-        $this->loop = Loop::get();
-    }
-
     public function testAwaitOneRejected()
     {
         $promise = $this->createPromiseRejected(new \Exception('test'));
 
         $this->setExpectedException('Exception', 'test');
-        React\Async\await($promise, $this->loop);
+        React\Async\await($promise);
     }
 
     public function testAwaitOneRejectedWithFalseWillWrapInUnexpectedValueException()
@@ -36,7 +26,7 @@ class AwaitTest extends TestCase
         $promise = Promise\reject(false);
 
         $this->setExpectedException('UnexpectedValueException', 'Promise rejected with unexpected value of type bool');
-        React\Async\await($promise, $this->loop);
+        React\Async\await($promise);
     }
 
     public function testAwaitOneRejectedWithNullWillWrapInUnexpectedValueException()
@@ -48,7 +38,7 @@ class AwaitTest extends TestCase
         $promise = Promise\reject(null);
 
         $this->setExpectedException('UnexpectedValueException', 'Promise rejected with unexpected value of type NULL');
-        React\Async\await($promise, $this->loop);
+        React\Async\await($promise);
     }
 
     /**
@@ -59,7 +49,7 @@ class AwaitTest extends TestCase
         $promise = Promise\reject(new \Error('Test', 42));
 
         try {
-            React\Async\await($promise, $this->loop);
+            React\Async\await($promise);
             $this->fail();
         } catch (\UnexpectedValueException $e) {
             $this->assertEquals('Promise rejected with unexpected Error: Test', $e->getMessage());
@@ -74,7 +64,7 @@ class AwaitTest extends TestCase
     {
         $promise = $this->createPromiseResolved(2);
 
-        $this->assertEquals(2, React\Async\await($promise, $this->loop));
+        $this->assertEquals(2, React\Async\await($promise));
     }
 
     public function testAwaitReturnsFulfilledValueWithoutGivingLoop()
@@ -89,7 +79,7 @@ class AwaitTest extends TestCase
         $promise = $this->createPromiseResolved(2, 0.02);
         $this->createTimerInterrupt(0.01);
 
-        $this->assertEquals(2, React\Async\await($promise, $this->loop));
+        $this->assertEquals(2, React\Async\await($promise));
     }
 
     public function testAwaitOneResolvesShouldNotCreateAnyGarbageReferences()
@@ -101,7 +91,7 @@ class AwaitTest extends TestCase
         gc_collect_cycles();
 
         $promise = Promise\resolve(1);
-        React\Async\await($promise, $this->loop);
+        React\Async\await($promise);
         unset($promise);
 
         $this->assertEquals(0, gc_collect_cycles());
@@ -117,7 +107,7 @@ class AwaitTest extends TestCase
 
         $promise = Promise\reject(new \RuntimeException());
         try {
-            React\Async\await($promise, $this->loop);
+            React\Async\await($promise);
         } catch (\Exception $e) {
             // no-op
         }
@@ -140,7 +130,7 @@ class AwaitTest extends TestCase
 
         $promise = Promise\reject(null);
         try {
-            React\Async\await($promise, $this->loop);
+            React\Async\await($promise);
         } catch (\Exception $e) {
             // no-op
         }
@@ -153,7 +143,7 @@ class AwaitTest extends TestCase
     {
         $deferred = new Deferred();
 
-        $this->loop->addTimer($delay, function () use ($deferred, $value) {
+        Loop::addTimer($delay, function () use ($deferred, $value) {
             $deferred->resolve($value);
         });
 
@@ -164,7 +154,7 @@ class AwaitTest extends TestCase
     {
         $deferred = new Deferred();
 
-        $this->loop->addTimer($delay, function () use ($deferred, $value) {
+        Loop::addTimer($delay, function () use ($deferred, $value) {
             $deferred->reject($value);
         });
 
@@ -173,9 +163,8 @@ class AwaitTest extends TestCase
 
     protected function createTimerInterrupt($delay = 0.01)
     {
-        $loop = $this->loop;
-        $loop->addTimer($delay, function () use ($loop) {
-            $loop->stop();
+        Loop::addTimer($delay, function () {
+            Loop::stop();
         });
     }
 

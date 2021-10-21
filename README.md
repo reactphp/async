@@ -54,7 +54,7 @@ Async\await(…);
 
 ### await()
 
-The `await(PromiseInterface $promise, ?LoopInterface $loop = null): mixed` function can be used to
+The `await(PromiseInterface $promise): mixed` function can be used to
 block waiting for the given `$promise` to be fulfilled.
 
 ```php
@@ -62,8 +62,14 @@ $result = React\Async\await($promise);
 ```
 
 This function will only return after the given `$promise` has settled, i.e.
-either fulfilled or rejected. In the meantime, the event loop will run any
-events attached to the same loop until the promise settles.
+either fulfilled or rejected.
+
+While the promise is pending, this function will assume control over the event
+loop. Internally, it will `run()` the [default loop](https://github.com/reactphp/event-loop#loop)
+until the promise settles and then calls `stop()` to terminate execution of the
+loop. This means this function is more suited for short-lived promise executions
+when using promise-based APIs is not feasible. For long-running applications,
+using promise-based APIs by leveraging chained `then()` calls is usually preferable.
 
 Once the promise is fulfilled, this function will return whatever the promise
 resolved to.
@@ -82,19 +88,6 @@ try {
     echo 'ERROR: ' . $exception->getMessage();
 }
 ```
-
-This function takes an optional `LoopInterface|null $loop` parameter that can be used to
-pass the event loop instance to use. You can use a `null` value here in order to
-use the [default loop](https://github.com/reactphp/event-loop#loop). This value
-SHOULD NOT be given unless you're sure you want to explicitly use a given event
-loop instance.
-
-Note that this function will assume control over the event loop. Internally, it
-will actually `run()` the loop until the promise settles and then calls `stop()` to
-terminate execution of the loop. This means this function is more suited for
-short-lived promise executions when using promise-based APIs is not feasible.
-For long-running applications, using promise-based APIs by leveraging chained
-`then()` calls is usually preferable.
 
 ### parallel()
 

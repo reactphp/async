@@ -3,7 +3,6 @@
 namespace React\Async;
 
 use React\EventLoop\Loop;
-use React\EventLoop\LoopInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 
@@ -15,8 +14,14 @@ use React\Promise\PromiseInterface;
  * ```
  *
  * This function will only return after the given `$promise` has settled, i.e.
- * either fulfilled or rejected. In the meantime, the event loop will run any
- * events attached to the same loop until the promise settles.
+ * either fulfilled or rejected.
+ *
+ * While the promise is pending, this function will assume control over the event
+ * loop. Internally, it will `run()` the [default loop](https://github.com/reactphp/event-loop#loop)
+ * until the promise settles and then calls `stop()` to terminate execution of the
+ * loop. This means this function is more suited for short-lived promise executions
+ * when using promise-based APIs is not feasible. For long-running applications,
+ * using promise-based APIs by leveraging chained `then()` calls is usually preferable.
  *
  * Once the promise is fulfilled, this function will return whatever the promise
  * resolved to.
@@ -36,43 +41,28 @@ use React\Promise\PromiseInterface;
  * }
  * ```
  *
- * This function takes an optional `LoopInterface|null $loop` parameter that can be used to
- * pass the event loop instance to use. You can use a `null` value here in order to
- * use the [default loop](https://github.com/reactphp/event-loop#loop). This value
- * SHOULD NOT be given unless you're sure you want to explicitly use a given event
- * loop instance.
- *
- * Note that this function will assume control over the event loop. Internally, it
- * will actually `run()` the loop until the promise settles and then calls `stop()` to
- * terminate execution of the loop. This means this function is more suited for
- * short-lived promise executions when using promise-based APIs is not feasible.
- * For long-running applications, using promise-based APIs by leveraging chained
- * `then()` calls is usually preferable.
- *
  * @param PromiseInterface $promise
- * @param ?LoopInterface   $loop
  * @return mixed returns whatever the promise resolves to
  * @throws \Exception when the promise is rejected
  */
-function await(PromiseInterface $promise, LoopInterface $loop = null)
+function await(PromiseInterface $promise)
 {
     $wait = true;
     $resolved = null;
     $exception = null;
     $rejected = false;
-    $loop = $loop ?: Loop::get();
 
     $promise->then(
-        function ($c) use (&$resolved, &$wait, $loop) {
+        function ($c) use (&$resolved, &$wait) {
             $resolved = $c;
             $wait = false;
-            $loop->stop();
+            Loop::stop();
         },
-        function ($error) use (&$exception, &$rejected, &$wait, $loop) {
+        function ($error) use (&$exception, &$rejected, &$wait) {
             $exception = $error;
             $rejected = true;
             $wait = false;
-            $loop->stop();
+            Loop::stop();
         }
     );
 
@@ -81,7 +71,7 @@ function await(PromiseInterface $promise, LoopInterface $loop = null)
     $promise = null;
 
     while ($wait) {
-        $loop->run();
+        Loop::run();
     }
 
     if ($rejected) {
