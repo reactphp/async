@@ -27,23 +27,25 @@ use React\Promise\PromiseInterface;
  * resolved to.
  *
  * Once the promise is rejected, this will throw whatever the promise rejected
- * with. If the promise did not reject with an `Exception`, then this function
- * will throw an `UnexpectedValueException` instead.
+ * with. If the promise did not reject with an `Exception` or `Throwable` (PHP 7+),
+ * then this function will throw an `UnexpectedValueException` instead.
  *
  * ```php
  * try {
  *     $result = React\Async\await($promise, $loop);
  *     // promise successfully fulfilled with $result
  *     echo 'Result: ' . $result;
- * } catch (Exception $exception) {
- *     // promise rejected with $exception
- *     echo 'ERROR: ' . $exception->getMessage();
+ * } catch (Throwable $e) {
+ *     // promise rejected with $e
+ *     echo 'Error: ' . $e->getMessage();
  * }
  * ```
  *
  * @param PromiseInterface $promise
  * @return mixed returns whatever the promise resolves to
- * @throws \Exception when the promise is rejected
+ * @throws \Exception when the promise is rejected with an `Exception`
+ * @throws \Throwable when the promise is rejected with a `Throwable` (PHP 7+)
+ * @throws \UnexpectedValueException when the promise is rejected with an unexpected value (Promise API v1 or v2 only)
  */
 function await(PromiseInterface $promise)
 {
@@ -75,15 +77,10 @@ function await(PromiseInterface $promise)
     }
 
     if ($rejected) {
+        // promise is rejected with an unexpected value (Promise API v1 or v2 only)
         if (!$exception instanceof \Exception && !$exception instanceof \Throwable) {
             $exception = new \UnexpectedValueException(
                 'Promise rejected with unexpected value of type ' . (is_object($exception) ? get_class($exception) : gettype($exception))
-            );
-        } elseif (!$exception instanceof \Exception) {
-            $exception = new \UnexpectedValueException(
-                'Promise rejected with unexpected ' . get_class($exception) . ': ' . $exception->getMessage(),
-                $exception->getCode(),
-                $exception
             );
         }
 
