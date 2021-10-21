@@ -4,38 +4,43 @@ namespace React\Tests\Async;
 
 use React;
 use React\EventLoop\Loop;
-use React\Promise;
-use React\Promise\Deferred;
+use React\Promise\Promise;
 
 class AwaitTest extends TestCase
 {
-    public function testAwaitOneRejected()
+    public function testAwaitThrowsExceptionWhenPromiseIsRejectedWithException()
     {
-        $promise = $this->createPromiseRejected(new \Exception('test'));
+        $promise = new Promise(function () {
+            throw new \Exception('test');
+        });
 
         $this->setExpectedException('Exception', 'test');
         React\Async\await($promise);
     }
 
-    public function testAwaitOneRejectedWithFalseWillWrapInUnexpectedValueException()
+    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithFalse()
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');
         }
 
-        $promise = Promise\reject(false);
+        $promise = new Promise(function ($_, $reject) {
+            $reject(false);
+        });
 
         $this->setExpectedException('UnexpectedValueException', 'Promise rejected with unexpected value of type bool');
         React\Async\await($promise);
     }
 
-    public function testAwaitOneRejectedWithNullWillWrapInUnexpectedValueException()
+    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithNull()
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');
         }
 
-        $promise = Promise\reject(null);
+        $promise = new Promise(function ($_, $reject) {
+            $reject(null);
+        });
 
         $this->setExpectedException('UnexpectedValueException', 'Promise rejected with unexpected value of type NULL');
         React\Async\await($promise);
@@ -44,37 +49,40 @@ class AwaitTest extends TestCase
     /**
      * @requires PHP 7
      */
-    public function testAwaitRejectedWithPhp7ErrorWillThrowOriginalError()
+    public function testAwaitThrowsErrorWhenPromiseIsRejectedWithError()
     {
-        $promise = Promise\reject(new \Error('Test', 42));
+        $promise = new Promise(function ($_, $reject) {
+            throw new \Error('Test', 42);
+        });
 
         $this->setExpectedException('Error', 'Test', 42);
         React\Async\await($promise);
     }
 
-    public function testAwaitOneResolved()
+    public function testAwaitReturnsValueWhenPromiseIsFullfilled()
     {
-        $promise = $this->createPromiseResolved(2);
-
-        $this->assertEquals(2, React\Async\await($promise));
-    }
-
-    public function testAwaitReturnsFulfilledValueWithoutGivingLoop()
-    {
-        $promise = Promise\resolve(42);
+        $promise = new Promise(function ($resolve) {
+            $resolve(42);
+        });
 
         $this->assertEquals(42, React\Async\await($promise));
     }
 
-    public function testAwaitOneInterrupted()
+    public function testAwaitReturnsValueWhenPromiseIsFulfilledEvenWhenOtherTimerStopsLoop()
     {
-        $promise = $this->createPromiseResolved(2, 0.02);
-        $this->createTimerInterrupt(0.01);
+        $promise = new Promise(function ($resolve) {
+            Loop::addTimer(0.02, function () use ($resolve) {
+                $resolve(2);
+            });
+        });
+        Loop::addTimer(0.01, function () {
+            Loop::stop();
+        });
 
         $this->assertEquals(2, React\Async\await($promise));
     }
 
-    public function testAwaitOneResolvesShouldNotCreateAnyGarbageReferences()
+    public function testAwaitShouldNotCreateAnyGarbageReferencesForResolvedPromise()
     {
         if (class_exists('React\Promise\When') && PHP_VERSION_ID >= 50400) {
             $this->markTestSkipped('Not supported on legacy Promise v1 API with PHP 5.4+');
@@ -82,22 +90,26 @@ class AwaitTest extends TestCase
 
         gc_collect_cycles();
 
-        $promise = Promise\resolve(1);
+        $promise = new Promise(function ($resolve) {
+            $resolve(42);
+        });
         React\Async\await($promise);
         unset($promise);
 
         $this->assertEquals(0, gc_collect_cycles());
     }
 
-    public function testAwaitOneRejectedShouldNotCreateAnyGarbageReferences()
+    public function testAwaitShouldNotCreateAnyGarbageReferencesForRejectedPromise()
     {
-        if (class_exists('React\Promise\When') && PHP_VERSION_ID >= 50400) {
-            $this->markTestSkipped('Not supported on legacy Promise v1 API with PHP 5.4+');
+        if (class_exists('React\Promise\When')) {
+            $this->markTestSkipped('Not supported on legacy Promise v1 API');
         }
 
         gc_collect_cycles();
 
-        $promise = Promise\reject(new \RuntimeException());
+        $promise = new Promise(function () {
+            throw new \RuntimeException();
+        });
         try {
             React\Async\await($promise);
         } catch (\Exception $e) {
@@ -108,7 +120,7 @@ class AwaitTest extends TestCase
         $this->assertEquals(0, gc_collect_cycles());
     }
 
-    public function testAwaitNullValueShouldNotCreateAnyGarbageReferences()
+    public function testAwaitShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithNullValue()
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');
@@ -120,7 +132,9 @@ class AwaitTest extends TestCase
 
         gc_collect_cycles();
 
-        $promise = Promise\reject(null);
+        $promise = new Promise(function ($_, $reject) {
+            $reject(null);
+        });
         try {
             React\Async\await($promise);
         } catch (\Exception $e) {
@@ -129,35 +143,6 @@ class AwaitTest extends TestCase
         unset($promise, $e);
 
         $this->assertEquals(0, gc_collect_cycles());
-    }
-
-    protected function createPromiseResolved($value = null, $delay = 0.01)
-    {
-        $deferred = new Deferred();
-
-        Loop::addTimer($delay, function () use ($deferred, $value) {
-            $deferred->resolve($value);
-        });
-
-        return $deferred->promise();
-    }
-
-    protected function createPromiseRejected($value = null, $delay = 0.01)
-    {
-        $deferred = new Deferred();
-
-        Loop::addTimer($delay, function () use ($deferred, $value) {
-            $deferred->reject($value);
-        });
-
-        return $deferred->promise();
-    }
-
-    protected function createTimerInterrupt($delay = 0.01)
-    {
-        Loop::addTimer($delay, function () {
-            Loop::stop();
-        });
     }
 
     public function setExpectedException($exception, $exceptionMessage = '', $exceptionCode = null)
