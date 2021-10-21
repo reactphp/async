@@ -16,6 +16,7 @@ an event loop, it can be used with this library.
 **Table of Contents**
 
 * [Usage](#usage)
+    * [await()](#await)
     * [parallel()](#parallel)
     * [series()](#series)
     * [waterfall()](#waterfall)
@@ -32,15 +33,15 @@ All functions reside under the `React\Async` namespace.
 The below examples refer to all functions with their fully-qualified names like this:
 
 ```php
-React\Async\parallel(…);
+React\Async\await(…);
 ```
 
 As of PHP 5.6+ you can also import each required function into your code like this:
 
 ```php
-use function React\Async\parallel;
+use function React\Async\await;
 
-parallel(…);
+await(…);
 ```
 
 Alternatively, you can also use an import statement similar to this:
@@ -48,7 +49,44 @@ Alternatively, you can also use an import statement similar to this:
 ```php
 use React\Async;
 
-Async\parallel(…);
+Async\await(…);
+```
+
+### await()
+
+The `await(PromiseInterface $promise): mixed` function can be used to
+block waiting for the given `$promise` to be fulfilled.
+
+```php
+$result = React\Async\await($promise);
+```
+
+This function will only return after the given `$promise` has settled, i.e.
+either fulfilled or rejected.
+
+While the promise is pending, this function will assume control over the event
+loop. Internally, it will `run()` the [default loop](https://github.com/reactphp/event-loop#loop)
+until the promise settles and then calls `stop()` to terminate execution of the
+loop. This means this function is more suited for short-lived promise executions
+when using promise-based APIs is not feasible. For long-running applications,
+using promise-based APIs by leveraging chained `then()` calls is usually preferable.
+
+Once the promise is fulfilled, this function will return whatever the promise
+resolved to.
+
+Once the promise is rejected, this will throw whatever the promise rejected
+with. If the promise did not reject with an `Exception` or `Throwable` (PHP 7+),
+then this function will throw an `UnexpectedValueException` instead.
+
+```php
+try {
+    $result = React\Async\await($promise);
+    // promise successfully fulfilled with $result
+    echo 'Result: ' . $result;
+} catch (Throwable $e) {
+    // promise rejected with $e
+    echo 'Error: ' . $e->getMessage();
+}
 ```
 
 ### parallel()
