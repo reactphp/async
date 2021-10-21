@@ -27,11 +27,12 @@
     ],
     "require": {
         "php": ">=5.3.2",
-        "react/promise": "^2.8 || ^1.2.1"
+        "react/event-loop": "^1.2",
+        "react/promise": "^2.8 || ^1.2.1",
+        "react/promise-timer": "^1.5"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.3 || ^5.7 || ^4.8.35",
-        "react/event-loop": "^1.2"
+        "phpunit/phpunit": "^9.3 || ^5.7 || ^4.8.35"
     },
     "suggest": {
         "react/event-loop": "You need an event loop for this to make sense."

@@ -16,6 +16,7 @@ an event loop, it can be used with this library.
 **Table of Contents**
 
 * [Usage](#usage)
+    * [await()](#await)
     * [parallel()](#parallel)
     * [series()](#series)
     * [waterfall()](#waterfall)
@@ -32,15 +33,15 @@ All functions reside under the `React\Async` namespace.
 The below examples refer to all functions with their fully-qualified names like this:
 
 ```php
-React\Async\parallel(…);
+React\Async\await(…);
 ```
 
 As of PHP 5.6+ you can also import each required function into your code like this:
 
 ```php
-use function React\Async\parallel;
+use function React\Async\await;
 
-parallel(…);
+await(…);
 ```
 
 Alternatively, you can also use an import statement similar to this:
@@ -48,8 +49,63 @@ Alternatively, you can also use an import statement similar to this:
 ```php
 use React\Async;
 
-Async\parallel(…);
+Async\await(…);
 ```
+
+### await()
+
+The `await(PromiseInterface $promise, ?LoopInterface $loop = null, ?float $timeout = null): mixed` function can be used to
+block waiting for the given `$promise` to be fulfilled.
+
+```php
+$result = React\Async\await($promise);
+```
+
+This function will only return after the given `$promise` has settled, i.e.
+either fulfilled or rejected. In the meantime, the event loop will run any
+events attached to the same loop until the promise settles.
+
+Once the promise is fulfilled, this function will return whatever the promise
+resolved to.
+
+Once the promise is rejected, this will throw whatever the promise rejected
+with. If the promise did not reject with an `Exception`, then this function
+will throw an `UnexpectedValueException` instead.
+
+```php
+try {
+    $result = React\Async\await($promise);
+    // promise successfully fulfilled with $result
+    echo 'Result: ' . $result;
+} catch (Exception $exception) {
+    // promise rejected with $exception
+    echo 'ERROR: ' . $exception->getMessage();
+}
+```
+
+This function takes an optional `LoopInterface|null $loop` parameter that can be used to
+pass the event loop instance to use. You can use a `null` value here in order to
+use the [default loop](https://github.com/reactphp/event-loop#loop). This value
+SHOULD NOT be given unless you're sure you want to explicitly use a given event
+loop instance.
+
+If no `$timeout` argument is given and the promise stays pending, then this
+will potentially wait/block forever until the promise is settled. To avoid
+this, API authors creating promises are expected to provide means to
+configure a timeout for the promise instead. For more details, see also the
+[`timeout()` function](https://github.com/reactphp/promise-timer#timeout).
+
+If the deprecated `$timeout` argument is given and the promise is still pending once the
+timeout triggers, this will `cancel()` the promise and throw a `TimeoutException`.
+This implies that if you pass a really small (or negative) value, it will still
+start a timer and will thus trigger at the earliest possible time in the future.
+
+Note that this function will assume control over the event loop. Internally, it
+will actually `run()` the loop until the promise settles and then calls `stop()` to
+terminate execution of the loop. This means this function is more suited for
+short-lived promise executions when using promise-based APIs is not feasible.
+For long-running applications, using promise-based APIs by leveraging chained
+`then()` calls is usually preferable.
 
 ### parallel()
 
