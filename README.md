@@ -54,7 +54,7 @@ Async\await(…);
 
 ### await()
 
-The `await(PromiseInterface $promise, ?LoopInterface $loop = null, ?float $timeout = null): mixed` function can be used to
+The `await(PromiseInterface $promise, ?LoopInterface $loop = null): mixed` function can be used to
 block waiting for the given `$promise` to be fulfilled.
 
 ```php
@@ -88,17 +88,6 @@ pass the event loop instance to use. You can use a `null` value here in order to
 use the [default loop](https://github.com/reactphp/event-loop#loop). This value
 SHOULD NOT be given unless you're sure you want to explicitly use a given event
 loop instance.
-
-If no `$timeout` argument is given and the promise stays pending, then this
-will potentially wait/block forever until the promise is settled. To avoid
-this, API authors creating promises are expected to provide means to
-configure a timeout for the promise instead. For more details, see also the
-[`timeout()` function](https://github.com/reactphp/promise-timer#timeout).
-
-If the deprecated `$timeout` argument is given and the promise is still pending once the
-timeout triggers, this will `cancel()` the promise and throw a `TimeoutException`.
-This implies that if you pass a really small (or negative) value, it will still
-start a timer and will thus trigger at the earliest possible time in the future.
 
 Note that this function will assume control over the event loop. Internally, it
 will actually `run()` the loop until the promise settles and then calls `stop()` to

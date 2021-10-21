@@ -6,7 +6,6 @@ use React\EventLoop\Loop;
 use React\EventLoop\LoopInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
-use React\Promise\Timer;
 
 /**
  * Block waiting for the given `$promise` to be fulfilled.
@@ -43,17 +42,6 @@ use React\Promise\Timer;
  * SHOULD NOT be given unless you're sure you want to explicitly use a given event
  * loop instance.
  *
- * If no `$timeout` argument is given and the promise stays pending, then this
- * will potentially wait/block forever until the promise is settled. To avoid
- * this, API authors creating promises are expected to provide means to
- * configure a timeout for the promise instead. For more details, see also the
- * [`timeout()` function](https://github.com/reactphp/promise-timer#timeout).
- *
- * If the deprecated `$timeout` argument is given and the promise is still pending once the
- * timeout triggers, this will `cancel()` the promise and throw a `TimeoutException`.
- * This implies that if you pass a really small (or negative) value, it will still
- * start a timer and will thus trigger at the earliest possible time in the future.
- *
  * Note that this function will assume control over the event loop. Internally, it
  * will actually `run()` the loop until the promise settles and then calls `stop()` to
  * terminate execution of the loop. This means this function is more suited for
@@ -63,22 +51,16 @@ use React\Promise\Timer;
  *
  * @param PromiseInterface $promise
  * @param ?LoopInterface   $loop
- * @param ?float           $timeout [deprecated] (optional) maximum timeout in seconds or null=wait forever
  * @return mixed returns whatever the promise resolves to
  * @throws \Exception when the promise is rejected
- * @throws \React\Promise\Timer\TimeoutException if the $timeout is given and triggers
  */
-function await(PromiseInterface $promise, LoopInterface $loop = null, $timeout = null)
+function await(PromiseInterface $promise, LoopInterface $loop = null)
 {
     $wait = true;
     $resolved = null;
     $exception = null;
     $rejected = false;
     $loop = $loop ?: Loop::get();
-
-    if ($timeout !== null) {
-        $promise = Timer\timeout($promise, $timeout, $loop);
-    }
 
     $promise->then(
         function ($c) use (&$resolved, &$wait, $loop) {

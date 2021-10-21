@@ -6,7 +6,6 @@ use React;
 use React\EventLoop\Loop;
 use React\Promise;
 use React\Promise\Deferred;
-use React\Promise\Timer\TimeoutException;
 
 class AwaitTest extends TestCase
 {
@@ -93,40 +92,6 @@ class AwaitTest extends TestCase
         $this->assertEquals(2, React\Async\await($promise, $this->loop));
     }
 
-    public function testAwaitOncePendingWillThrowOnTimeout()
-    {
-        $promise = new Promise\Promise(function () { });
-
-        $this->setExpectedException('React\Promise\Timer\TimeoutException');
-        React\Async\await($promise, $this->loop, 0.001);
-    }
-
-    public function testAwaitOncePendingWillThrowAndCallCancellerOnTimeout()
-    {
-        $cancelled = false;
-        $promise = new Promise\Promise(function () { }, function () use (&$cancelled) {
-            $cancelled = true;
-        });
-
-        try {
-            React\Async\await($promise, $this->loop, 0.001);
-        } catch (TimeoutException $expected) {
-            $this->assertTrue($cancelled);
-        }
-    }
-
-    public function testAwaitOnceWithTimeoutWillResolvemmediatelyAndCleanUpTimeout()
-    {
-        $promise = Promise\resolve(true);
-
-        $time = microtime(true);
-        React\Async\await($promise, $this->loop, 5.0);
-        $this->loop->run();
-        $time = microtime(true) - $time;
-
-        $this->assertLessThan(0.1, $time);
-    }
-
     public function testAwaitOneResolvesShouldNotCreateAnyGarbageReferences()
     {
         if (class_exists('React\Promise\When') && PHP_VERSION_ID >= 50400) {
@@ -161,25 +126,6 @@ class AwaitTest extends TestCase
         $this->assertEquals(0, gc_collect_cycles());
     }
 
-    public function testAwaitOneRejectedWithTimeoutShouldNotCreateAnyGarbageReferences()
-    {
-        if (class_exists('React\Promise\When') && PHP_VERSION_ID >= 50400) {
-            $this->markTestSkipped('Not supported on legacy Promise v1 API with PHP 5.4+');
-        }
-
-        gc_collect_cycles();
-
-        $promise = Promise\reject(new \RuntimeException());
-        try {
-            React\Async\await($promise, $this->loop, 0.001);
-        } catch (\Exception $e) {
-            // no-op
-        }
-        unset($promise, $e);
-
-        $this->assertEquals(0, gc_collect_cycles());
-    }
-
     public function testAwaitNullValueShouldNotCreateAnyGarbageReferences()
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
@@ -195,68 +141,6 @@ class AwaitTest extends TestCase
         $promise = Promise\reject(null);
         try {
             React\Async\await($promise, $this->loop);
-        } catch (\Exception $e) {
-            // no-op
-        }
-        unset($promise, $e);
-
-        $this->assertEquals(0, gc_collect_cycles());
-    }
-
-    /**
-     * @requires PHP 7
-     */
-    public function testAwaitPendingPromiseWithTimeoutAndCancellerShouldNotCreateAnyGarbageReferences()
-    {
-        if (class_exists('React\Promise\When')) {
-            $this->markTestSkipped('Not supported on legacy Promise v1 API');
-        }
-
-        gc_collect_cycles();
-
-        $promise = new \React\Promise\Promise(function () { }, function () {
-            throw new \RuntimeException();
-        });
-        try {
-            React\Async\await($promise, $this->loop, 0.001);
-        } catch (\Exception $e) {
-            // no-op
-        }
-        unset($promise, $e);
-
-        $this->assertEquals(0, gc_collect_cycles());
-    }
-
-    /**
-     * @requires PHP 7
-     */
-    public function testAwaitPendingPromiseWithTimeoutAndWithoutCancellerShouldNotCreateAnyGarbageReferences()
-    {
-        gc_collect_cycles();
-
-        $promise = new \React\Promise\Promise(function () { });
-        try {
-            React\Async\await($promise, $this->loop, 0.001);
-        } catch (\Exception $e) {
-            // no-op
-        }
-        unset($promise, $e);
-
-        $this->assertEquals(0, gc_collect_cycles());
-    }
-
-    /**
-     * @requires PHP 7
-     */
-    public function testAwaitPendingPromiseWithTimeoutAndNoOpCancellerShouldNotCreateAnyGarbageReferences()
-    {
-        gc_collect_cycles();
-
-        $promise = new \React\Promise\Promise(function () { }, function () {
-            // no-op
-        });
-        try {
-            React\Async\await($promise, $this->loop, 0.001);
         } catch (\Exception $e) {
             // no-op
         }
