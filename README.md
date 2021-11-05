@@ -63,14 +63,8 @@ $result = React\Async\await($promise);
 ```
 
 This function will only return after the given `$promise` has settled, i.e.
-either fulfilled or rejected.
-
-While the promise is pending, this function will assume control over the event
-loop. Internally, it will `run()` the [default loop](https://github.com/reactphp/event-loop#loop)
-until the promise settles and then calls `stop()` to terminate execution of the
-loop. This means this function is more suited for short-lived promise executions
-when using promise-based APIs is not feasible. For long-running applications,
-using promise-based APIs by leveraging chained `then()` calls is usually preferable.
+either fulfilled or rejected. While the promise is pending, this function will 
+suspend the fiber it's called from until the promise is settled.
 
 Once the promise is fulfilled, this function will return whatever the promise
 resolved to.

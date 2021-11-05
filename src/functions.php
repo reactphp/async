@@ -5,6 +5,7 @@ namespace React\Async;
 use React\EventLoop\Loop;
 use React\Promise\CancellablePromiseInterface;
 use React\Promise\Deferred;
+use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use function React\Promise\reject;
 use function React\Promise\resolve;
@@ -52,47 +53,19 @@ use function React\Promise\resolve;
  */
 function await(PromiseInterface $promise): mixed
 {
-    $wait = true;
-    $resolved = null;
-    $exception = null;
-    $rejected = false;
+    $fiber = new SimpleFiber();
 
     $promise->then(
-        function ($c) use (&$resolved, &$wait) {
-            $resolved = $c;
-            $wait = false;
-            Loop::stop();
+        function (mixed $value) use (&$resolved, $fiber): void {
+            $fiber->resume($value);
         },
-        function ($error) use (&$exception, &$rejected, &$wait) {
-            $exception = $error;
-            $rejected = true;
-            $wait = false;
-            Loop::stop();
+        function (mixed $throwable) use (&$resolved, $fiber): void {
+            $fiber->throw($throwable);
         }
     );
 
-    // Explicitly overwrite argument with null value. This ensure that this
-    // argument does not show up in the stack trace in PHP 7+ only.
-    $promise = null;
-
-    while ($wait) {
-        Loop::run();
-    }
-
-    if ($rejected) {
-        // promise is rejected with an unexpected value (Promise API v1 or v2 only)
-        if (!$exception instanceof \Throwable) {
-            $exception = new \UnexpectedValueException(
-                'Promise rejected with unexpected value of type ' . (is_object($exception) ? get_class($exception) : gettype($exception))
-            );
-        }
-
-        throw $exception;
-    }
-
-    return $resolved;
+    return $fiber->suspend();
 }
-
 
 /**
  * Execute a Generator-based coroutine to "await" promises.

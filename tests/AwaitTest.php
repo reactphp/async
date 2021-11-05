@@ -70,20 +70,6 @@ class AwaitTest extends TestCase
         $this->assertEquals(42, React\Async\await($promise));
     }
 
-    public function testAwaitReturnsValueWhenPromiseIsFulfilledEvenWhenOtherTimerStopsLoop()
-    {
-        $promise = new Promise(function ($resolve) {
-            Loop::addTimer(0.02, function () use ($resolve) {
-                $resolve(2);
-            });
-        });
-        Loop::addTimer(0.01, function () {
-            Loop::stop();
-        });
-
-        $this->assertEquals(2, React\Async\await($promise));
-    }
-
     public function testAwaitShouldNotCreateAnyGarbageReferencesForResolvedPromise()
     {
         if (class_exists('React\Promise\When')) {
