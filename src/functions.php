@@ -11,6 +11,31 @@ use function React\Promise\reject;
 use function React\Promise\resolve;
 
 /**
+ * Execute an async Fiber-based function to "await" promises.
+ *
+ * @param callable(mixed ...$args):mixed $function
+ * @param mixed ...$args Optional list of additional arguments that will be passed to the given `$function` as is
+ * @return PromiseInterface<mixed>
+ * @since 4.0.0
+ * @see coroutine()
+ */
+function async(callable $function, mixed ...$args): PromiseInterface
+{
+    return new Promise(function (callable $resolve, callable $reject) use ($function, $args): void {
+        $fiber = new \Fiber(function () use ($resolve, $reject, $function, $args): void {
+            try {
+                $resolve($function(...$args));
+            } catch (\Throwable $exception) {
+                $reject($exception);
+            }
+        });
+
+        Loop::futureTick(static fn() => $fiber->start());
+    });
+}
+
+
+/**
  * Block waiting for the given `$promise` to be fulfilled.
  *
  * ```php

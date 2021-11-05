@@ -8,7 +8,10 @@ use React\Promise\Promise;
 
 class AwaitTest extends TestCase
 {
-    public function testAwaitThrowsExceptionWhenPromiseIsRejectedWithException()
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitThrowsExceptionWhenPromiseIsRejectedWithException(callable $await)
     {
         $promise = new Promise(function () {
             throw new \Exception('test');
@@ -16,10 +19,13 @@ class AwaitTest extends TestCase
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('test');
-        React\Async\await($promise);
+        $await($promise);
     }
 
-    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithFalse()
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithFalse(callable $await)
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');
@@ -31,10 +37,13 @@ class AwaitTest extends TestCase
 
         $this->expectException(\UnexpectedValueException::class);
         $this->expectExceptionMessage('Promise rejected with unexpected value of type bool');
-        React\Async\await($promise);
+        $await($promise);
     }
 
-    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithNull()
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithNull(callable $await)
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');
@@ -46,10 +55,13 @@ class AwaitTest extends TestCase
 
         $this->expectException(\UnexpectedValueException::class);
         $this->expectExceptionMessage('Promise rejected with unexpected value of type NULL');
-        React\Async\await($promise);
+        $await($promise);
     }
 
-    public function testAwaitThrowsErrorWhenPromiseIsRejectedWithError()
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitThrowsErrorWhenPromiseIsRejectedWithError(callable $await)
     {
         $promise = new Promise(function ($_, $reject) {
             throw new \Error('Test', 42);
@@ -58,19 +70,25 @@ class AwaitTest extends TestCase
         $this->expectException(\Error::class);
         $this->expectExceptionMessage('Test');
         $this->expectExceptionCode(42);
-        React\Async\await($promise);
+        $await($promise);
     }
 
-    public function testAwaitReturnsValueWhenPromiseIsFullfilled()
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitReturnsValueWhenPromiseIsFullfilled(callable $await)
     {
         $promise = new Promise(function ($resolve) {
             $resolve(42);
         });
 
-        $this->assertEquals(42, React\Async\await($promise));
+        $this->assertEquals(42, $await($promise));
     }
 
-    public function testAwaitShouldNotCreateAnyGarbageReferencesForResolvedPromise()
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitShouldNotCreateAnyGarbageReferencesForResolvedPromise(callable $await)
     {
         if (class_exists('React\Promise\When')) {
             $this->markTestSkipped('Not supported on legacy Promise v1 API');
@@ -81,13 +99,16 @@ class AwaitTest extends TestCase
         $promise = new Promise(function ($resolve) {
             $resolve(42);
         });
-        React\Async\await($promise);
+        $await($promise);
         unset($promise);
 
         $this->assertEquals(0, gc_collect_cycles());
     }
 
-    public function testAwaitShouldNotCreateAnyGarbageReferencesForRejectedPromise()
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitShouldNotCreateAnyGarbageReferencesForRejectedPromise(callable $await)
     {
         if (class_exists('React\Promise\When')) {
             $this->markTestSkipped('Not supported on legacy Promise v1 API');
@@ -99,7 +120,7 @@ class AwaitTest extends TestCase
             throw new \RuntimeException();
         });
         try {
-            React\Async\await($promise);
+            $await($promise);
         } catch (\Exception $e) {
             // no-op
         }
@@ -108,7 +129,10 @@ class AwaitTest extends TestCase
         $this->assertEquals(0, gc_collect_cycles());
     }
 
-    public function testAwaitShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithNullValue()
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithNullValue(callable $await)
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');
@@ -124,12 +148,18 @@ class AwaitTest extends TestCase
             $reject(null);
         });
         try {
-            React\Async\await($promise);
+            $await($promise);
         } catch (\Exception $e) {
             // no-op
         }
         unset($promise, $e);
 
         $this->assertEquals(0, gc_collect_cycles());
+    }
+
+    public function provideAwaiters(): iterable
+    {
+        yield 'await' => [static fn (React\Promise\PromiseInterface $promise): mixed => React\Async\await($promise)];
+        yield 'async' => [static fn (React\Promise\PromiseInterface $promise): mixed => React\Async\await(React\Async\async(static fn(): mixed => $promise))];
     }
 }
