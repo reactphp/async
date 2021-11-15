@@ -102,7 +102,7 @@ function parallel(array $tasks)
 
     $done = function () use (&$results, &$errors, $deferred) {
         if (count($errors)) {
-            $deferred->reject(array_shift($errors));
+            $deferred->reject(reset($errors));
             return;
         }
 
@@ -116,7 +116,7 @@ function parallel(array $tasks)
     }
 
     $checkDone = function () use (&$results, &$errors, $numTasks, $done) {
-        if ($numTasks === count($results) + count($errors)) {
+        if ($numTasks === count($results) || count($errors)) {
             $done();
         }
     };
@@ -136,6 +136,10 @@ function parallel(array $tasks)
         assert($promise instanceof PromiseInterface);
 
         $promise->then($taskCallback, $taskErrback);
+
+        if ($errors) {
+            break;
+        }
     }
 
     return $deferred->promise();

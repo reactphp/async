@@ -29,7 +29,7 @@ class ParallelTest extends TestCase
             },
             function () {
                 return new Promise(function ($resolve) {
-                    Loop::addTimer(0.1, function () use ($resolve) {
+                    Loop::addTimer(0.11, function () use ($resolve) {
                         $resolve('bar');
                     });
                 });
@@ -49,7 +49,7 @@ class ParallelTest extends TestCase
         $timer->assertInRange(0.1, 0.2);
     }
 
-    public function testParallelWithError()
+    public function testParallelWithErrorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks()
     {
         $called = 0;
 
@@ -60,7 +60,8 @@ class ParallelTest extends TestCase
                     $resolve('foo');
                 });
             },
-            function () {
+            function () use (&$called) {
+                $called++;
                 return new Promise(function () {
                     throw new \RuntimeException('whoops');
                 });
@@ -80,7 +81,7 @@ class ParallelTest extends TestCase
         $this->assertSame(2, $called);
     }
 
-    public function testParallelWithDelayedError()
+    public function testParallelWithDelayedErrorReturnsPromiseRejectedWithExceptionFromTask()
     {
         $called = 0;
 
@@ -91,7 +92,8 @@ class ParallelTest extends TestCase
                     $resolve('foo');
                 });
             },
-            function () {
+            function () use (&$called) {
+                $called++;
                 return new Promise(function ($_, $reject) {
                     Loop::addTimer(0.001, function () use ($reject) {
                         $reject(new \RuntimeException('whoops'));
@@ -112,6 +114,6 @@ class ParallelTest extends TestCase
 
         Loop::run();
 
-        $this->assertSame(2, $called);
+        $this->assertSame(3, $called);
     }
 }
