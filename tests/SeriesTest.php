@@ -79,4 +79,27 @@ class SeriesTest extends TestCase
 
         $this->assertSame(1, $called);
     }
+
+    public function testSeriesWillCancelFirstPendingPromiseWhenCallingCancelOnResultingPromise()
+    {
+        $cancelled = 0;
+
+        $tasks = array(
+            function () {
+                return new Promise(function ($resolve) {
+                    $resolve();
+                });
+            },
+            function () use (&$cancelled) {
+                return new Promise(function () { }, function () use (&$cancelled) {
+                    $cancelled++;
+                });
+            }
+        );
+
+        $promise = React\Async\series($tasks);
+        $promise->cancel();
+
+        $this->assertSame(1, $cancelled);
+    }
 }

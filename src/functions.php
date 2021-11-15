@@ -98,7 +98,14 @@ function await(PromiseInterface $promise)
 function parallel(array $tasks)
 {
     $pending = array();
-    $deferred = new Deferred();
+    $deferred = new Deferred(function () use (&$pending) {
+        foreach ($pending as $promise) {
+            if ($promise instanceof CancellablePromiseInterface) {
+                $promise->cancel();
+            }
+        }
+        $pending = array();
+    });
     $results = array();
     $errored = false;
 
@@ -148,7 +155,13 @@ function parallel(array $tasks)
  */
 function series(array $tasks)
 {
-    $deferred = new Deferred();
+    $pending = null;
+    $deferred = new Deferred(function () use (&$pending) {
+        if ($pending instanceof CancellablePromiseInterface) {
+            $pending->cancel();
+        }
+        $pending = null;
+    });
     $results = array();
 
     /** @var callable():void $next */
@@ -157,7 +170,7 @@ function series(array $tasks)
         $next();
     };
 
-    $next = function () use (&$tasks, $taskCallback, $deferred, &$results) {
+    $next = function () use (&$tasks, $taskCallback, $deferred, &$results, &$pending) {
         if (0 === count($tasks)) {
             $deferred->resolve($results);
             return;
@@ -166,6 +179,7 @@ function series(array $tasks)
         $task = array_shift($tasks);
         $promise = call_user_func($task);
         assert($promise instanceof PromiseInterface);
+        $pending = $promise;
 
         $promise->then($taskCallback, array($deferred, 'reject'));
     };
@@ -181,10 +195,16 @@ function series(array $tasks)
  */
 function waterfall(array $tasks)
 {
-    $deferred = new Deferred();
+    $pending = null;
+    $deferred = new Deferred(function () use (&$pending) {
+        if ($pending instanceof CancellablePromiseInterface) {
+            $pending->cancel();
+        }
+        $pending = null;
+    });
 
     /** @var callable $next */
-    $next = function ($value = null) use (&$tasks, &$next, $deferred) {
+    $next = function ($value = null) use (&$tasks, &$next, $deferred, &$pending) {
         if (0 === count($tasks)) {
             $deferred->resolve($value);
             return;
@@ -193,6 +213,7 @@ function waterfall(array $tasks)
         $task = array_shift($tasks);
         $promise = call_user_func_array($task, func_get_args());
         assert($promise instanceof PromiseInterface);
+        $pending = $promise;
 
         $promise->then($next, array($deferred, 'reject'));
     };
