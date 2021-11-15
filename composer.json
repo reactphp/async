@@ -33,9 +33,6 @@
     "require-dev": {
         "phpunit/phpunit": "^9.3 || ^5.7 || ^4.8.35"
     },
-    "suggest": {
-        "react/event-loop": "You need an event loop for this to make sense."
-    },
     "autoload": {
         "files": [
             "src/functions_include.php"
@@ -43,10 +40,5 @@
     },
     "autoload-dev": {
         "psr-4": { "React\\Tests\\Async\\": "tests/" }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.0-dev"
-        }
     }
 }

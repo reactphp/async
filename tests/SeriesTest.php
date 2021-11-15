@@ -22,14 +22,14 @@ class SeriesTest extends TestCase
         $tasks = array(
             function () {
                 return new Promise(function ($resolve) {
-                    Loop::addTimer(0.05, function () use ($resolve) {
+                    Loop::addTimer(0.051, function () use ($resolve) {
                         $resolve('foo');
                     });
                 });
             },
             function () {
                 return new Promise(function ($resolve) {
-                    Loop::addTimer(0.05, function () use ($resolve) {
+                    Loop::addTimer(0.051, function () use ($resolve) {
                         $resolve('bar');
                     });
                 });
