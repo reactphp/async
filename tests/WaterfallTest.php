@@ -86,4 +86,27 @@ class WaterfallTest extends TestCase
 
         $this->assertSame(1, $called);
     }
+
+    public function testWaterfallWillCancelFirstPendingPromiseWhenCallingCancelOnResultingPromise()
+    {
+        $cancelled = 0;
+
+        $tasks = array(
+            function () {
+                return new Promise(function ($resolve) {
+                    $resolve();
+                });
+            },
+            function () use (&$cancelled) {
+                return new Promise(function () { }, function () use (&$cancelled) {
+                    $cancelled++;
+                });
+            }
+        );
+
+        $promise = React\Async\waterfall($tasks);
+        $promise->cancel();
+
+        $this->assertSame(1, $cancelled);
+    }
 }

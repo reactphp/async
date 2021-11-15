@@ -3,6 +3,7 @@
 namespace React\Async;
 
 use React\EventLoop\Loop;
+use React\Promise\CancellablePromiseInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 
@@ -96,46 +97,53 @@ function await(PromiseInterface $promise)
  */
 function parallel(array $tasks)
 {
-    $deferred = new Deferred();
-    $results = array();
-    $errors = array();
-
-    $done = function () use (&$results, &$errors, $deferred) {
-        if (count($errors)) {
-            $deferred->reject(array_shift($errors));
-            return;
+    $pending = array();
+    $deferred = new Deferred(function () use (&$pending) {
+        foreach ($pending as $promise) {
+            if ($promise instanceof CancellablePromiseInterface) {
+                $promise->cancel();
+            }
         }
-
-        $deferred->resolve($results);
-    };
+        $pending = array();
+    });
+    $results = array();
+    $errored = false;
 
     $numTasks = count($tasks);
-
     if (0 === $numTasks) {
-        $done();
+        $deferred->resolve($results);
     }
 
-    $checkDone = function () use (&$results, &$errors, $numTasks, $done) {
-        if ($numTasks === count($results) + count($errors)) {
-            $done();
-        }
-    };
+    $taskErrback = function ($error) use (&$pending, $deferred, &$errored) {
+        $errored = true;
+        $deferred->reject($error);
 
-    $taskErrback = function ($error) use (&$errors, $checkDone) {
-        $errors[] = $error;
-        $checkDone();
+        foreach ($pending as $promise) {
+            if ($promise instanceof CancellablePromiseInterface) {
+                $promise->cancel();
+            }
+        }
+        $pending = array();
     };
 
     foreach ($tasks as $i => $task) {
-        $taskCallback = function ($result) use (&$results, $i, $checkDone) {
+        $taskCallback = function ($result) use (&$results, &$pending, $numTasks, $i, $deferred) {
             $results[$i] = $result;
-            $checkDone();
+
+            if (count($results) === $numTasks) {
+                $deferred->resolve($results);
+            }
         };
 
         $promise = call_user_func($task);
         assert($promise instanceof PromiseInterface);
+        $pending[$i] = $promise;
 
         $promise->then($taskCallback, $taskErrback);
+
+        if ($errored) {
+            break;
+        }
     }
 
     return $deferred->promise();
@@ -147,7 +155,13 @@ function parallel(array $tasks)
  */
 function series(array $tasks)
 {
-    $deferred = new Deferred();
+    $pending = null;
+    $deferred = new Deferred(function () use (&$pending) {
+        if ($pending instanceof CancellablePromiseInterface) {
+            $pending->cancel();
+        }
+        $pending = null;
+    });
     $results = array();
 
     /** @var callable():void $next */
@@ -156,7 +170,7 @@ function series(array $tasks)
         $next();
     };
 
-    $next = function () use (&$tasks, $taskCallback, $deferred, &$results) {
+    $next = function () use (&$tasks, $taskCallback, $deferred, &$results, &$pending) {
         if (0 === count($tasks)) {
             $deferred->resolve($results);
             return;
@@ -165,6 +179,7 @@ function series(array $tasks)
         $task = array_shift($tasks);
         $promise = call_user_func($task);
         assert($promise instanceof PromiseInterface);
+        $pending = $promise;
 
         $promise->then($taskCallback, array($deferred, 'reject'));
     };
@@ -180,10 +195,16 @@ function series(array $tasks)
  */
 function waterfall(array $tasks)
 {
-    $deferred = new Deferred();
+    $pending = null;
+    $deferred = new Deferred(function () use (&$pending) {
+        if ($pending instanceof CancellablePromiseInterface) {
+            $pending->cancel();
+        }
+        $pending = null;
+    });
 
     /** @var callable $next */
-    $next = function ($value = null) use (&$tasks, &$next, $deferred) {
+    $next = function ($value = null) use (&$tasks, &$next, $deferred, &$pending) {
         if (0 === count($tasks)) {
             $deferred->resolve($value);
             return;
@@ -192,6 +213,7 @@ function waterfall(array $tasks)
         $task = array_shift($tasks);
         $promise = call_user_func_array($task, func_get_args());
         assert($promise instanceof PromiseInterface);
+        $pending = $promise;
 
         $promise->then($next, array($deferred, 'reject'));
     };
