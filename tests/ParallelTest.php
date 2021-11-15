@@ -81,6 +81,35 @@ class ParallelTest extends TestCase
         $this->assertSame(2, $called);
     }
 
+    public function testParallelWithErrorWillCancelPendingPromises()
+    {
+        $cancelled = 0;
+
+        $tasks = array(
+            function () use (&$cancelled) {
+                return new Promise(function () { }, function () use (&$cancelled) {
+                    $cancelled++;
+                });
+            },
+            function () {
+                return new Promise(function () {
+                    throw new \RuntimeException('whoops');
+                });
+            },
+            function () use (&$cancelled) {
+                return new Promise(function () { }, function () use (&$cancelled) {
+                    $cancelled++;
+                });
+            }
+        );
+
+        $promise = React\Async\parallel($tasks);
+
+        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('whoops')));
+
+        $this->assertSame(1, $cancelled);
+    }
+
     public function testParallelWithDelayedErrorReturnsPromiseRejectedWithExceptionFromTask()
     {
         $called = 0;

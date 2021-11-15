@@ -3,6 +3,7 @@
 namespace React\Async;
 
 use React\EventLoop\Loop;
+use React\Promise\CancellablePromiseInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 
@@ -96,48 +97,44 @@ function await(PromiseInterface $promise)
  */
 function parallel(array $tasks)
 {
+    $pending = array();
     $deferred = new Deferred();
     $results = array();
-    $errors = array();
-
-    $done = function () use (&$results, &$errors, $deferred) {
-        if (count($errors)) {
-            $deferred->reject(reset($errors));
-            return;
-        }
-
-        $deferred->resolve($results);
-    };
+    $errored = false;
 
     $numTasks = count($tasks);
-
     if (0 === $numTasks) {
-        $done();
+        $deferred->resolve($results);
     }
 
-    $checkDone = function () use (&$results, &$errors, $numTasks, $done) {
-        if ($numTasks === count($results) || count($errors)) {
-            $done();
-        }
-    };
+    $taskErrback = function ($error) use (&$pending, $deferred, &$errored) {
+        $errored = true;
+        $deferred->reject($error);
 
-    $taskErrback = function ($error) use (&$errors, $checkDone) {
-        $errors[] = $error;
-        $checkDone();
+        foreach ($pending as $promise) {
+            if ($promise instanceof CancellablePromiseInterface) {
+                $promise->cancel();
+            }
+        }
+        $pending = array();
     };
 
     foreach ($tasks as $i => $task) {
-        $taskCallback = function ($result) use (&$results, $i, $checkDone) {
+        $taskCallback = function ($result) use (&$results, &$pending, $numTasks, $i, $deferred) {
             $results[$i] = $result;
-            $checkDone();
+
+            if (count($results) === $numTasks) {
+                $deferred->resolve($results);
+            }
         };
 
         $promise = call_user_func($task);
         assert($promise instanceof PromiseInterface);
+        $pending[$i] = $promise;
 
         $promise->then($taskCallback, $taskErrback);
 
-        if ($errors) {
+        if ($errored) {
             break;
         }
     }
