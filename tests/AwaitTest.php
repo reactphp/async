@@ -14,7 +14,8 @@ class AwaitTest extends TestCase
             throw new \Exception('test');
         });
 
-        $this->setExpectedException('Exception', 'test');
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('test');
         React\Async\await($promise);
     }
 
@@ -28,7 +29,8 @@ class AwaitTest extends TestCase
             $reject(false);
         });
 
-        $this->setExpectedException('UnexpectedValueException', 'Promise rejected with unexpected value of type bool');
+        $this->expectException(\UnexpectedValueException::class);
+        $this->expectExceptionMessage('Promise rejected with unexpected value of type bool');
         React\Async\await($promise);
     }
 
@@ -42,20 +44,20 @@ class AwaitTest extends TestCase
             $reject(null);
         });
 
-        $this->setExpectedException('UnexpectedValueException', 'Promise rejected with unexpected value of type NULL');
+        $this->expectException(\UnexpectedValueException::class);
+        $this->expectExceptionMessage('Promise rejected with unexpected value of type NULL');
         React\Async\await($promise);
     }
 
-    /**
-     * @requires PHP 7
-     */
     public function testAwaitThrowsErrorWhenPromiseIsRejectedWithError()
     {
         $promise = new Promise(function ($_, $reject) {
             throw new \Error('Test', 42);
         });
 
-        $this->setExpectedException('Error', 'Test', 42);
+        $this->expectException(\Error::class);
+        $this->expectExceptionMessage('Test');
+        $this->expectExceptionCode(42);
         React\Async\await($promise);
     }
 
@@ -84,8 +86,8 @@ class AwaitTest extends TestCase
 
     public function testAwaitShouldNotCreateAnyGarbageReferencesForResolvedPromise()
     {
-        if (class_exists('React\Promise\When') && PHP_VERSION_ID >= 50400) {
-            $this->markTestSkipped('Not supported on legacy Promise v1 API with PHP 5.4+');
+        if (class_exists('React\Promise\When')) {
+            $this->markTestSkipped('Not supported on legacy Promise v1 API');
         }
 
         gc_collect_cycles();
@@ -126,8 +128,8 @@ class AwaitTest extends TestCase
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');
         }
 
-        if (class_exists('React\Promise\When') && PHP_VERSION_ID >= 50400) {
-            $this->markTestSkipped('Not supported on legacy Promise v1 API with PHP 5.4+');
+        if (class_exists('React\Promise\When')) {
+            $this->markTestSkipped('Not supported on legacy Promise v1 API');
         }
 
         gc_collect_cycles();
@@ -143,22 +145,5 @@ class AwaitTest extends TestCase
         unset($promise, $e);
 
         $this->assertEquals(0, gc_collect_cycles());
-    }
-
-    public function setExpectedException($exception, $exceptionMessage = '', $exceptionCode = null)
-    {
-        if (method_exists($this, 'expectException')) {
-            // PHPUnit 5+
-            $this->expectException($exception);
-            if ($exceptionMessage !== '') {
-                $this->expectExceptionMessage($exceptionMessage);
-            }
-            if ($exceptionCode !== null) {
-                $this->expectExceptionCode($exceptionCode);
-            }
-        } else {
-            // legacy PHPUnit 4
-            parent::setExpectedException($exception, $exceptionMessage, $exceptionCode);
-        }
     }
 }

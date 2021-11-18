@@ -2,6 +2,7 @@
 
 namespace React\Tests\Async;
 
+use PHPUnit\Framework\MockObject\MockBuilder;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
 class TestCase extends BaseTestCase
@@ -39,12 +40,12 @@ class TestCase extends BaseTestCase
 
     protected function createCallableMock()
     {
-        if (method_exists('PHPUnit\Framework\MockObject\MockBuilder', 'addMethods')) {
+        if (method_exists(MockBuilder::class, 'addMethods')) {
             // PHPUnit 9+
-            return $this->getMockBuilder('stdClass')->addMethods(array('__invoke'))->getMock();
+            return $this->getMockBuilder(\stdClass::class)->addMethods(['__invoke'])->getMock();
         } else {
-            // legacy PHPUnit 4 - PHPUnit 8
-            return $this->getMockBuilder('stdClass')->setMethods(array('__invoke'))->getMock();
+            // PHPUnit < 9
+            return $this->getMockBuilder(\stdClass::class)->setMethods(['__invoke'])->getMock();
         }
     }
 }
