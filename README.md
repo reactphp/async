@@ -17,6 +17,7 @@ an event loop, it can be used with this library.
 
 * [Usage](#usage)
     * [await()](#await)
+    * [coroutine()](#coroutine)
     * [parallel()](#parallel)
     * [series()](#series)
     * [waterfall()](#waterfall)
@@ -87,6 +88,121 @@ try {
     // promise rejected with $e
     echo 'Error: ' . $e->getMessage();
 }
+```
+
+### coroutine()
+
+The `coroutine(callable $function, mixed ...$args): PromiseInterface<mixed>` function can be used to
+execute a Generator-based coroutine to "await" promises.
+
+```php
+React\Async\coroutine(function () {
+    $browser = new React\Http\Browser();
+
+    try {
+        $response = yield $browser->get('https://example.com/');
+        assert($response instanceof Psr\Http\Message\ResponseInterface);
+        echo $response->getBody();
+    } catch (Exception $e) {
+        echo 'Error: ' . $e->getMessage() . PHP_EOL;
+    }
+});
+```
+
+Using Generator-based coroutines is an alternative to directly using the
+underlying promise APIs. For many use cases, this makes using promise-based
+APIs much simpler, as it resembles a synchronous code flow more closely.
+The above example performs the equivalent of directly using the promise APIs:
+
+```php
+$browser = new React\Http\Browser();
+
+$browser->get('https://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
+    echo $response->getBody();
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
+```
+
+The `yield` keyword can be used to "await" a promise resolution. Internally,
+it will turn the entire given `$function` into a [`Generator`](https://www.php.net/manual/en/class.generator.php).
+This allows the execution to be interrupted and resumed at the same place
+when the promise is fulfilled. The `yield` statement returns whatever the
+promise is fulfilled with. If the promise is rejected, it will throw an
+`Exception` or `Throwable`.
+
+The `coroutine()` function will always return a Proimise which will be
+fulfilled with whatever your `$function` returns. Likewise, it will return
+a promise that will be rejected if you throw an `Exception` or `Throwable`
+from your `$function`. This allows you easily create Promise-based functions:
+
+```php
+$promise = React\Async\coroutine(function () {
+    $browser = new React\Http\Browser();
+    $urls = [
+        'https://example.com/alice',
+        'https://example.com/bob'
+    ];
+
+    $bytes = 0;
+    foreach ($urls as $url) {
+        $response = yield $browser->get($url);
+        assert($response instanceof Psr\Http\Message\ResponseInterface);
+        $bytes += $response->getBody()->getSize();
+    }
+    return $bytes;
+});
+
+$promise->then(function (int $bytes) {
+    echo 'Total size: ' . $bytes . PHP_EOL;
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
+```
+
+The previous example uses a `yield` statement inside a loop to highlight how
+this vastly simplifies consuming asynchronous operations. At the same time,
+this naive example does not leverage concurrent execution, as it will
+essentially "await" between each operation. In order to take advantage of
+concurrent execution within the given `$function`, you can "await" multiple
+promises by using a single `yield` together with Promise-based primitives
+like this:
+
+```php
+$promise = React\Async\coroutine(function () {
+    $browser = new React\Http\Browser();
+    $urls = [
+        'https://example.com/alice',
+        'https://example.com/bob'
+    ];
+
+    $promises = [];
+    foreach ($urls as $url) {
+        $promises[] = $browser->get($url);
+    }
+
+    try {
+        $responses = yield React\Promise\all($promises);
+    } catch (Exception $e) {
+        foreach ($promises as $promise) {
+            $promise->cancel();
+        }
+        throw $e;
+    }
+
+    $bytes = 0;
+    foreach ($responses as $response) {
+        assert($response instanceof Psr\Http\Message\ResponseInterface);
+        $bytes += $response->getBody()->getSize();
+    }
+    return $bytes;
+});
+
+$promise->then(function (int $bytes) {
+    echo 'Total size: ' . $bytes . PHP_EOL;
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
 ```
 
 ### parallel()
