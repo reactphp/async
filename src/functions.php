@@ -50,7 +50,7 @@ use function React\Promise\resolve;
  * @throws \Throwable when the promise is rejected with a `Throwable`
  * @throws \UnexpectedValueException when the promise is rejected with an unexpected value (Promise API v1 or v2 only)
  */
-function await(PromiseInterface $promise)
+function await(PromiseInterface $promise): mixed
 {
     $wait = true;
     $resolved = null;
@@ -212,7 +212,7 @@ function await(PromiseInterface $promise)
  * @return PromiseInterface<mixed>
  * @since 3.0.0
  */
-function coroutine(callable $function, ...$args): PromiseInterface
+function coroutine(callable $function, mixed ...$args): PromiseInterface
 {
     try {
         $generator = $function(...$args);
