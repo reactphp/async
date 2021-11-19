@@ -2,6 +2,7 @@
 
 namespace React\Tests\Async;
 
+use React\Promise\Promise;
 use function React\Async\coroutine;
 use function React\Promise\reject;
 use function React\Promise\resolve;
@@ -103,5 +104,18 @@ class CoroutineTest extends TestCase
         });
 
         $promise->then(null, $this->expectCallableOnceWith(new \UnexpectedValueException('Expected coroutine to yield React\Promise\PromiseInterface, but got integer')));
+    }
+
+    public function testCoroutineWillCancelPendingPromiseWhenCallingCancelOnResultingPromise()
+    {
+        $promise = coroutine(function () {
+            yield new Promise(function () { }, function () {
+                throw new \RuntimeException('Operation cancelled', 42);
+            });
+        });
+
+        $promise->cancel();
+
+        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Operation cancelled', 42)));
     }
 }

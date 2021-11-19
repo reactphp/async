@@ -224,10 +224,16 @@ function coroutine(callable $function, ...$args): PromiseInterface
         return resolve($generator);
     }
 
-    $deferred = new Deferred();
+    $promise = null;
+    $deferred = new Deferred(function () use (&$promise) {
+        if ($promise instanceof CancellablePromiseInterface) {
+            $promise->cancel();
+        }
+        $promise = null;
+    });
 
     /** @var callable $next */
-    $next = function () use ($deferred, $generator, &$next) {
+    $next = function () use ($deferred, $generator, &$next, &$promise) {
         try {
             if (!$generator->valid()) {
                 $deferred->resolve($generator->getReturn());
