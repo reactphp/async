@@ -106,16 +106,41 @@ class CoroutineTest extends TestCase
         $promise->then(null, $this->expectCallableOnceWith(new \UnexpectedValueException('Expected coroutine to yield React\Promise\PromiseInterface, but got integer')));
     }
 
+
     public function testCoroutineWillCancelPendingPromiseWhenCallingCancelOnResultingPromise()
     {
-        $promise = coroutine(function () {
-            yield new Promise(function () { }, function () {
-                throw new \RuntimeException('Operation cancelled', 42);
+        $cancelled = 0;
+        $promise = coroutine(function () use (&$cancelled) {
+            yield new Promise(function () use (&$cancelled) {
+                ++$cancelled;
             });
         });
 
         $promise->cancel();
 
-        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Operation cancelled', 42)));
+        $this->assertEquals(1, $cancelled);
+    }
+
+    public function testCoroutineWillCancelAllPendingPromisesWhenFunctionContinuesToYieldWhenCallingCancelOnResultingPromise()
+    {
+        $promise = coroutine(function () {
+            $promise = new Promise(function () { }, function () {
+                throw new \RuntimeException('Frist operation cancelled', 21);
+            });
+
+            try {
+                yield $promise;
+            } catch (\RuntimeException $e) {
+                // ignore exception and continue
+            }
+
+            yield new Promise(function () { }, function () {
+                throw new \RuntimeException('Second operation cancelled', 42);
+            });
+        });
+
+        $promise->cancel();
+
+        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Second operation cancelled', 42)));
     }
 }

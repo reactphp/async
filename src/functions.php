@@ -226,10 +226,12 @@ function coroutine(callable $function, ...$args): PromiseInterface
 
     $promise = null;
     $deferred = new Deferred(function () use (&$promise) {
-        if ($promise instanceof CancellablePromiseInterface) {
-            $promise->cancel();
+        // cancel pending promise(s) as long as generator function keeps yielding
+        while ($promise instanceof CancellablePromiseInterface) {
+            $temp = $promise;
+            $promise = null;
+            $temp->cancel();
         }
-        $promise = null;
     });
 
     /** @var callable $next */
