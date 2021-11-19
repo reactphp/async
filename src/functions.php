@@ -238,16 +238,19 @@ function coroutine(callable $function, ...$args): PromiseInterface
     $next = function () use ($deferred, $generator, &$next, &$promise) {
         try {
             if (!$generator->valid()) {
+                $next = null;
                 $deferred->resolve($generator->getReturn());
                 return;
             }
         } catch (\Throwable $e) {
+            $next = null;
             $deferred->reject($e);
             return;
         }
 
         $promise = $generator->current();
         if (!$promise instanceof PromiseInterface) {
+            $next = null;
             $deferred->reject(new \UnexpectedValueException(
                 'Expected coroutine to yield ' . PromiseInterface::class . ', but got ' . (is_object($promise) ? get_class($promise) : gettype($promise))
             ));
@@ -260,7 +263,8 @@ function coroutine(callable $function, ...$args): PromiseInterface
         }, function (\Throwable $reason) use ($generator, $next) {
             $generator->throw($reason);
             $next();
-        })->then(null, function (\Throwable $reason) use ($deferred) {
+        })->then(null, function (\Throwable $reason) use ($deferred, &$next) {
+            $next = null;
             $deferred->reject($reason);
         });
     };

@@ -143,4 +143,99 @@ class CoroutineTest extends TestCase
 
         $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Second operation cancelled', 42)));
     }
+
+    public function testCoroutineShouldNotCreateAnyGarbageReferencesWhenGeneratorReturns()
+    {
+        if (class_exists('React\Promise\When')) {
+            $this->markTestSkipped('Not supported on legacy Promise v1 API');
+        }
+
+        gc_collect_cycles();
+        gc_collect_cycles();
+
+        $promise = coroutine(function () {
+            if (false) {
+                yield;
+            }
+            return 42;
+        });
+
+        unset($promise);
+
+        $this->assertEquals(0, gc_collect_cycles());
+    }
+
+    public function testCoroutineShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithExceptionImmediately()
+    {
+        if (class_exists('React\Promise\When')) {
+            $this->markTestSkipped('Not supported on legacy Promise v1 API');
+        }
+
+        gc_collect_cycles();
+
+        $promise = coroutine(function () {
+            yield new Promise(function () {
+                throw new \RuntimeException('Failed', 42);
+            });
+        });
+
+        unset($promise);
+
+        $this->assertEquals(0, gc_collect_cycles());
+    }
+
+    public function testCoroutineShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithExceptionOnCancellation()
+    {
+        if (class_exists('React\Promise\When')) {
+            $this->markTestSkipped('Not supported on legacy Promise v1 API');
+        }
+
+        gc_collect_cycles();
+
+        $promise = coroutine(function () {
+            yield new Promise(function () { }, function () {
+                throw new \RuntimeException('Operation cancelled', 42);
+            });
+        });
+
+        $promise->cancel();
+        unset($promise);
+
+        $this->assertEquals(0, gc_collect_cycles());
+    }
+
+    public function testCoroutineShouldNotCreateAnyGarbageReferencesWhenGeneratorThrowsBeforeFirstYield()
+    {
+        if (class_exists('React\Promise\When')) {
+            $this->markTestSkipped('Not supported on legacy Promise v1 API');
+        }
+
+        gc_collect_cycles();
+
+        $promise = coroutine(function () {
+            throw new \RuntimeException('Failed', 42);
+            yield;
+        });
+
+        unset($promise);
+
+        $this->assertEquals(0, gc_collect_cycles());
+    }
+
+    public function testCoroutineShouldNotCreateAnyGarbageReferencesWhenGeneratorYieldsInvalidValue()
+    {
+        if (class_exists('React\Promise\When')) {
+            $this->markTestSkipped('Not supported on legacy Promise v1 API');
+        }
+
+        gc_collect_cycles();
+
+        $promise = coroutine(function () {
+            yield 42;
+        });
+
+        unset($promise);
+
+        $this->assertEquals(0, gc_collect_cycles());
+    }
 }
