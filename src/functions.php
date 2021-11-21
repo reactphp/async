@@ -78,7 +78,7 @@ function async(callable $function, mixed ...$args): PromiseInterface
  */
 function await(PromiseInterface $promise): mixed
 {
-    $fiber = new SimpleFiber();
+    $fiber = FiberFactory::create();
 
     $promise->then(
         function (mixed $value) use (&$resolved, $fiber): void {

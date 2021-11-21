@@ -7,7 +7,7 @@ use React\EventLoop\Loop;
 /**
  * @internal
  */
-final class SimpleFiber
+final class SimpleFiber implements FiberInterface
 {
     private static ?\Fiber $scheduler = null;
     private ?\Fiber $fiber = null;
