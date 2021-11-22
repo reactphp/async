@@ -5,9 +5,35 @@ namespace React\Async;
 use React\EventLoop\Loop;
 use React\Promise\CancellablePromiseInterface;
 use React\Promise\Deferred;
+use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use function React\Promise\reject;
 use function React\Promise\resolve;
+
+/**
+ * Execute an async Fiber-based function to "await" promises.
+ *
+ * @param callable(mixed ...$args):mixed $function
+ * @param mixed ...$args Optional list of additional arguments that will be passed to the given `$function` as is
+ * @return PromiseInterface<mixed>
+ * @since 4.0.0
+ * @see coroutine()
+ */
+function async(callable $function, mixed ...$args): PromiseInterface
+{
+    return new Promise(function (callable $resolve, callable $reject) use ($function, $args): void {
+        $fiber = new \Fiber(function () use ($resolve, $reject, $function, $args): void {
+            try {
+                $resolve($function(...$args));
+            } catch (\Throwable $exception) {
+                $reject($exception);
+            }
+        });
+
+        Loop::futureTick(static fn() => $fiber->start());
+    });
+}
+
 
 /**
  * Block waiting for the given `$promise` to be fulfilled.
@@ -52,47 +78,19 @@ use function React\Promise\resolve;
  */
 function await(PromiseInterface $promise): mixed
 {
-    $wait = true;
-    $resolved = null;
-    $exception = null;
-    $rejected = false;
+    $fiber = FiberFactory::create();
 
     $promise->then(
-        function ($c) use (&$resolved, &$wait) {
-            $resolved = $c;
-            $wait = false;
-            Loop::stop();
+        function (mixed $value) use (&$resolved, $fiber): void {
+            $fiber->resume($value);
         },
-        function ($error) use (&$exception, &$rejected, &$wait) {
-            $exception = $error;
-            $rejected = true;
-            $wait = false;
-            Loop::stop();
+        function (mixed $throwable) use (&$resolved, $fiber): void {
+            $fiber->throw($throwable);
         }
     );
 
-    // Explicitly overwrite argument with null value. This ensure that this
-    // argument does not show up in the stack trace in PHP 7+ only.
-    $promise = null;
-
-    while ($wait) {
-        Loop::run();
-    }
-
-    if ($rejected) {
-        // promise is rejected with an unexpected value (Promise API v1 or v2 only)
-        if (!$exception instanceof \Throwable) {
-            $exception = new \UnexpectedValueException(
-                'Promise rejected with unexpected value of type ' . (is_object($exception) ? get_class($exception) : gettype($exception))
-            );
-        }
-
-        throw $exception;
-    }
-
-    return $resolved;
+    return $fiber->suspend();
 }
-
 
 /**
  * Execute a Generator-based coroutine to "await" promises.
