@@ -157,6 +157,36 @@ class AwaitTest extends TestCase
         $this->assertEquals(0, gc_collect_cycles());
     }
 
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAlreadyFulfilledPromiseShouldNotSuspendFiber(callable $await)
+    {
+        for ($i = 0; $i < 6; $i++) {
+            $this->assertSame($i, $await(React\Promise\resolve($i)));
+        }
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testNestedAwaits(callable $await)
+    {
+        $this->assertTrue($await(new Promise(function ($resolve) use ($await) {
+            $resolve($await(new Promise(function ($resolve) use ($await) {
+                $resolve($await(new Promise(function ($resolve) use ($await) {
+                    $resolve($await(new Promise(function ($resolve) use ($await) {
+                        $resolve($await(new Promise(function ($resolve) use ($await) {
+                            Loop::addTimer(0.01, function () use ($resolve) {
+                                $resolve(true);
+                            });
+                        })));
+                    })));
+                })));
+            })));
+        })));
+    }
+
     public function provideAwaiters(): iterable
     {
         yield 'await' => [static fn (React\Promise\PromiseInterface $promise): mixed => React\Async\await($promise)];

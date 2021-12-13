@@ -27,14 +27,8 @@ final class SimpleFiber implements FiberInterface
         Loop::futureTick(fn() => $this->fiber->resume($value));
     }
 
-    public function throw(mixed $throwable): void
+    public function throw(\Throwable $throwable): void
     {
-        if (!$throwable instanceof \Throwable) {
-            $throwable = new \UnexpectedValueException(
-                'Promise rejected with unexpected value of type ' . (is_object($throwable) ? get_class($throwable) : gettype($throwable))
-            );
-        }
-
         if ($this->fiber === null) {
             Loop::futureTick(static fn() => \Fiber::suspend(static fn() => throw $throwable));
             return;
