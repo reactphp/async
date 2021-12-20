@@ -204,6 +204,29 @@ $promise->then(function (int $bytes) {
 });
 ```
 
+Promises returned by `async()` can be cancelled, and when done any currently and future awaited promise inside that and 
+any nested fibers with their awaited promises will also be cancelled. As such the following example will only output 
+`ab` as the [`sleep()`](https://reactphp.org/promise-timer/#sleep) between `a` and `b` is cancelled throwing a timeout 
+exception that bubbles up through the fibers ultimately to the end user through the [`await()`](#await) on the last line 
+of the example.
+
+```php
+$promise = async(static function (): int {
+    echo 'a';
+    await(async(static function(): void {
+        echo 'b';
+        await(sleep(2));
+        echo 'c';
+    })());
+    echo 'd';
+
+    return time();
+})();
+
+$promise->cancel();
+await($promise);
+```
+
 ### await()
 
 The `await(PromiseInterface $promise): mixed` function can be used to

@@ -332,6 +332,42 @@ class AwaitTest extends TestCase
         })));
     }
 
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testResolvedPromisesShouldBeDetached(callable $await)
+    {
+        $await(async(function () use ($await): int {
+            $fiber = \Fiber::getCurrent();
+            $await(React\Promise\Timer\sleep(0.01));
+            $this->assertNull(React\Async\FiberMap::getPromise($fiber));
+
+            return time();
+        })());
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testRejectedPromisesShouldBeDetached(callable $await)
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Boom!');
+
+        $await(async(function () use ($await): int {
+            $fiber = \Fiber::getCurrent();
+            try {
+                $await(React\Promise\reject(new \Exception('Boom!')));
+            } catch (\Throwable $throwable) {
+                throw $throwable;
+            } finally {
+                $this->assertNull(React\Async\FiberMap::getPromise($fiber));
+            }
+
+            return time();
+        })());
+    }
+
     public function provideAwaiters(): iterable
     {
         yield 'await' => [static fn (React\Promise\PromiseInterface $promise): mixed => React\Async\await($promise)];
