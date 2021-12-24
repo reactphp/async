@@ -14,14 +14,13 @@ use function React\Promise\resolve;
  * Execute an async Fiber-based function to "await" promises.
  *
  * @param callable(mixed ...$args):mixed $function
- * @param mixed ...$args Optional list of additional arguments that will be passed to the given `$function` as is
- * @return PromiseInterface<mixed>
+ * @return callable(): PromiseInterface<mixed>
  * @since 4.0.0
  * @see coroutine()
  */
-function async(callable $function, mixed ...$args): PromiseInterface
+function async(callable $function): callable
 {
-    return new Promise(function (callable $resolve, callable $reject) use ($function, $args): void {
+    return static fn (mixed ...$args): PromiseInterface => new Promise(function (callable $resolve, callable $reject) use ($function, $args): void {
         $fiber = new \Fiber(function () use ($resolve, $reject, $function, $args): void {
             try {
                 $resolve($function(...$args));
