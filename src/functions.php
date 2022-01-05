@@ -77,16 +77,48 @@ function async(callable $function): callable
  */
 function await(PromiseInterface $promise): mixed
 {
-    $fiber = FiberFactory::create();
+    $fiber = null;
+    $resolved = false;
+    $rejected = false;
+    $resolvedValue = null;
+    $rejectedThrowable = null;
 
     $promise->then(
-        function (mixed $value) use (&$resolved, $fiber): void {
+        function (mixed $value) use (&$resolved, &$resolvedValue, &$fiber): void {
+            if ($fiber === null) {
+                $resolved = true;
+                $resolvedValue = $value;
+                return;
+            }
+
             $fiber->resume($value);
         },
-        function (mixed $throwable) use (&$resolved, $fiber): void {
+        function (mixed $throwable) use (&$rejected, &$rejectedThrowable, &$fiber): void {
+            if (!$throwable instanceof \Throwable) {
+                $throwable = new \UnexpectedValueException(
+                    'Promise rejected with unexpected value of type ' . (is_object($throwable) ? get_class($throwable) : gettype($throwable))
+                );
+            }
+
+            if ($fiber === null) {
+                $rejected = true;
+                $rejectedThrowable = $throwable;
+                return;
+            }
+
             $fiber->throw($throwable);
         }
     );
+
+    if ($resolved) {
+        return $resolvedValue;
+    }
+
+    if ($rejected) {
+        throw $rejectedThrowable;
+    }
+
+    $fiber = FiberFactory::create();
 
     return $fiber->suspend();
 }

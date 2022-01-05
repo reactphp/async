@@ -17,7 +17,7 @@ interface FiberInterface
 {
     public function resume(mixed $value): void;
 
-    public function throw(mixed $throwable): void;
+    public function throw(\Throwable $throwable): void;
 
     public function suspend(): mixed;
 }
