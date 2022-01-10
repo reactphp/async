@@ -145,6 +145,37 @@ class AwaitTest extends TestCase
         $this->assertEquals(0, gc_collect_cycles());
     }
 
+    public function testAlreadyFulfilledPromiseShouldShortCircuitAndNotRunLoop()
+    {
+        for ($i = 0; $i < 6; $i++) {
+            $this->assertSame($i, React\Async\await(React\Promise\resolve($i)));
+        }
+    }
+
+    public function testPendingPromiseShouldNotShortCircuitAndRunLoop()
+    {
+        Loop::futureTick($this->expectCallableOnce());
+
+        $this->assertSame(1, React\Async\await(new Promise(function ($resolve) {
+            Loop::futureTick(function () use ($resolve) {
+                $resolve(1);
+            });
+        })));
+    }
+
+    public function testPendingPromiseShouldNotShortCircuitAndRunLoopAndThrowOnRejection()
+    {
+        Loop::futureTick($this->expectCallableOnce());
+
+        $this->setExpectedException('Exception', 'test');
+
+        $this->assertSame(1, React\Async\await(new Promise(function ($resolve, $reject) {
+            Loop::futureTick(function () use ($reject) {
+                $reject(new \Exception('test'));
+            });
+        })));
+    }
+
     public function setExpectedException($exception, $exceptionMessage = '', $exceptionCode = null)
     {
         if (method_exists($this, 'expectException')) {
