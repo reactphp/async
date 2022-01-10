@@ -122,6 +122,38 @@ class AwaitTest extends TestCase
         $this->assertEquals(0, gc_collect_cycles());
     }
 
+    public function testAlreadyFulfilledPromiseShouldShortCircuitAndNotRunLoop()
+    {
+        for ($i = 0; $i < 6; $i++) {
+            $this->assertSame($i, React\Async\await(React\Promise\resolve($i)));
+        }
+    }
+
+    public function testPendingPromiseShouldNotShortCircuitAndRunLoop()
+    {
+        Loop::futureTick($this->expectCallableOnce());
+
+        $this->assertSame(1, React\Async\await(new Promise(static function (callable $resolve) {
+            Loop::futureTick(static function () use ($resolve) {
+                $resolve(1);
+            });
+        })));
+    }
+
+    public function testPendingPromiseShouldNotShortCircuitAndRunLoopAndThrowOnRejection()
+    {
+        Loop::futureTick($this->expectCallableOnce());
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('test');
+
+        $this->assertSame(1, React\Async\await(new Promise(static function (callable $resolve, callable $reject) {
+            Loop::futureTick(static function () use ($reject) {
+                $reject(new \Exception('test'));
+            });
+        })));
+    }
+
     public function testAwaitShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithNullValue()
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {

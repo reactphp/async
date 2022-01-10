@@ -53,18 +53,47 @@ use function React\Promise\resolve;
 function await(PromiseInterface $promise)
 {
     $wait = true;
-    $resolved = null;
-    $exception = null;
+    $resolved = false;
     $rejected = false;
+    $resolvedValue = null;
+    $rejectedThrowable = null;
 
     $promise->then(
-        function ($c) use (&$resolved, &$wait) {
-            $resolved = $c;
+        function ($c) use (&$resolved, &$resolvedValue, &$wait) {
+            $resolvedValue = $c;
+            $resolved = true;
             $wait = false;
             Loop::stop();
         },
-        function ($error) use (&$exception, &$rejected, &$wait) {
-            $exception = $error;
+        function ($error) use (&$rejected, &$rejectedThrowable, &$wait) {
+            // promise is rejected with an unexpected value (Promise API v1 or v2 only)
+            if (!$error instanceof \Exception && !$error instanceof \Throwable) {
+                $error = new \UnexpectedValueException(
+                    'Promise rejected with unexpected value of type ' . (is_object($error) ? get_class($error) : gettype($error))
+                );
+
+                // avoid garbage references by replacing all closures in call stack.
+                // what a lovely piece of code!
+                $r = new \ReflectionProperty('Exception', 'trace');
+                $r->setAccessible(true);
+                $trace = $r->getValue($error);
+
+                // Exception trace arguments only available when zend.exception_ignore_args is not set
+                // @codeCoverageIgnoreStart
+                foreach ($trace as $ti => $one) {
+                    if (isset($one['args'])) {
+                        foreach ($one['args'] as $ai => $arg) {
+                            if ($arg instanceof \Closure) {
+                                $trace[$ti]['args'][$ai] = 'Object(' . \get_class($arg) . ')';
+                            }
+                        }
+                    }
+                }
+                // @codeCoverageIgnoreEnd
+                $r->setValue($error, $trace);
+            }
+
+            $rejectedThrowable = $error;
             $rejected = true;
             $wait = false;
             Loop::stop();
@@ -75,24 +104,24 @@ function await(PromiseInterface $promise)
     // argument does not show up in the stack trace in PHP 7+ only.
     $promise = null;
 
+    if ($rejected) {
+        throw $rejectedThrowable;
+    }
+
+    if ($resolved) {
+        return $resolvedValue;
+    }
+
     while ($wait) {
         Loop::run();
     }
 
     if ($rejected) {
-        // promise is rejected with an unexpected value (Promise API v1 or v2 only)
-        if (!$exception instanceof \Throwable) {
-            $exception = new \UnexpectedValueException(
-                'Promise rejected with unexpected value of type ' . (is_object($exception) ? get_class($exception) : gettype($exception))
-            );
-        }
-
-        throw $exception;
+        throw $rejectedThrowable;
     }
 
-    return $resolved;
+    return $resolvedValue;
 }
-
 
 /**
  * Execute a Generator-based coroutine to "await" promises.
