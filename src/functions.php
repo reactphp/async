@@ -11,7 +11,142 @@ use function React\Promise\reject;
 use function React\Promise\resolve;
 
 /**
- * Execute an async Fiber-based function to "await" promises.
+ * Return an async function for a function that uses [`await()`](#await) internally.
+ *
+ * This function is specifically designed to complement the [`await()` function](#await).
+ * The [`await()` function](#await) can be considered *blocking* from the
+ * perspective of the calling code. You can avoid this blocking behavior by
+ * wrapping it in an `async()` function call. Everything inside this function
+ * will still be blocked, but everything outside this function can be executed
+ * asynchronously without blocking:
+ *
+ * ```php
+ * Loop::addTimer(0.5, React\Async\async(function() {
+ *     echo 'a';
+ *     React\async\await(React\Promise\Timer\sleep(1.0));
+ *     echo 'c';
+ * }));
+ *
+ * Loop::addTimer(1.0, fn() => echo 'b');
+ *
+ * // prints "a" at t=0.5s
+ * // prints "b" at t=1.0s
+ * // prints "c" at t=1.5s
+ * ```
+ *
+ * See also the [`await()` function](#await) for more details.
+ *
+ * Note that this function only works in tandem with the [`await()` function](#await).
+ * In particular, this function does not "magically" make any blocking function
+ * non-blocking:
+ *
+ * ```php
+ * Loop::addTimer(0.5, React\Async\async(function() {
+ *     echo 'a';
+ *     sleep(1); // broken: using PHP's blocking sleep() for demonstration purposes
+ *     echo 'c';
+ * }));
+ *
+ * Loop::addTimer(1.0, fn() => echo 'b');
+ *
+ * // prints "a" at t=0.5s
+ * // prints "c" at t=1.5s: Correct timing, but wrong order
+ * // prints "b" at t=1.5s: Triggered too late because it was blocked
+ * ```
+ *
+ * As an alternative, you should always make sure to use this function in tandem
+ * with the [`await()` function](#await) and an async API returning a promise
+ * as shown in the previous example.
+ *
+ * The `async()` function is specifically designed for cases where it is used
+ * as a callback (such as an event loop timer, event listener, or promise
+ * callback). For this reason, it returns a new function wrapping the given
+ * `$function` instead of directly invoking it and returning its value.
+ *
+ * ```php
+ * use function React\Async\async;
+ *
+ * Loop::addTimer(1.0, async(function () { … }));
+ * $connection->on('close', async(function () { … }));
+ * $stream->on('data', async(function ($data) { … }));
+ * $promise->then(async(function (int $result) { … }));
+ * ```
+ *
+ * You can invoke this wrapping function to invoke the given `$function` with
+ * any arguments given as-is. The function will always return a Promise which
+ * will be fulfilled with whatever your `$function` returns. Likewise, it will
+ * return a promise that will be rejected if you throw an `Exception` or
+ * `Throwable` from your `$function`. This allows you to easily create
+ * Promise-based functions:
+ *
+ * ```php
+ * $promise = React\Async\async(function (): int {
+ *     $browser = new React\Http\Browser();
+ *     $urls = [
+ *         'https://example.com/alice',
+ *         'https://example.com/bob'
+ *     ];
+ *
+ *     $bytes = 0;
+ *     foreach ($urls as $url) {
+ *         $response = React\Async\await($browser->get($url));
+ *         assert($response instanceof Psr\Http\Message\ResponseInterface);
+ *         $bytes += $response->getBody()->getSize();
+ *     }
+ *     return $bytes;
+ * })();
+ *
+ * $promise->then(function (int $bytes) {
+ *     echo 'Total size: ' . $bytes . PHP_EOL;
+ * }, function (Exception $e) {
+ *     echo 'Error: ' . $e->getMessage() . PHP_EOL;
+ * });
+ * ```
+ *
+ * The previous example uses [`await()`](#await) inside a loop to highlight how
+ * this vastly simplifies consuming asynchronous operations. At the same time,
+ * this naive example does not leverage concurrent execution, as it will
+ * essentially "await" between each operation. In order to take advantage of
+ * concurrent execution within the given `$function`, you can "await" multiple
+ * promises by using a single [`await()`](#await) together with Promise-based
+ * primitives like this:
+ *
+ * ```php
+ * $promise = React\Async\async(function (): int {
+ *     $browser = new React\Http\Browser();
+ *     $urls = [
+ *         'https://example.com/alice',
+ *         'https://example.com/bob'
+ *     ];
+ *
+ *     $promises = [];
+ *     foreach ($urls as $url) {
+ *         $promises[] = $browser->get($url);
+ *     }
+ *
+ *     try {
+ *         $responses = React\Async\await(React\Promise\all($promises));
+ *     } catch (Exception $e) {
+ *         foreach ($promises as $promise) {
+ *             $promise->cancel();
+ *         }
+ *         throw $e;
+ *     }
+ *
+ *     $bytes = 0;
+ *     foreach ($responses as $response) {
+ *         assert($response instanceof Psr\Http\Message\ResponseInterface);
+ *         $bytes += $response->getBody()->getSize();
+ *     }
+ *     return $bytes;
+ * })();
+ *
+ * $promise->then(function (int $bytes) {
+ *     echo 'Total size: ' . $bytes . PHP_EOL;
+ * }, function (Exception $e) {
+ *     echo 'Error: ' . $e->getMessage() . PHP_EOL;
+ * });
+ * ```
  *
  * @param callable(mixed ...$args):mixed $function
  * @return callable(): PromiseInterface<mixed>
@@ -38,18 +173,31 @@ function async(callable $function): callable
  * Block waiting for the given `$promise` to be fulfilled.
  *
  * ```php
- * $result = React\Async\await($promise, $loop);
+ * $result = React\Async\await($promise);
  * ```
  *
  * This function will only return after the given `$promise` has settled, i.e.
- * either fulfilled or rejected.
+ * either fulfilled or rejected. While the promise is pending, this function
+ * can be considered *blocking* from the perspective of the calling code.
+ * You can avoid this blocking behavior by wrapping it in an [`async()` function](#async)
+ * call. Everything inside this function will still be blocked, but everything
+ * outside this function can be executed asynchronously without blocking:
  *
- * While the promise is pending, this function will assume control over the event
- * loop. Internally, it will `run()` the [default loop](https://github.com/reactphp/event-loop#loop)
- * until the promise settles and then calls `stop()` to terminate execution of the
- * loop. This means this function is more suited for short-lived promise executions
- * when using promise-based APIs is not feasible. For long-running applications,
- * using promise-based APIs by leveraging chained `then()` calls is usually preferable.
+ * ```php
+ * Loop::addTimer(0.5, React\Async\async(function() {
+ *     echo 'a';
+ *     React\async\await(React\Promise\Timer\sleep(1.0));
+ *     echo 'c';
+ * }));
+ *
+ * Loop::addTimer(1.0, fn() => echo 'b');
+ *
+ * // prints "a" at t=0.5s
+ * // prints "b" at t=1.0s
+ * // prints "c" at t=1.5s
+ * ```
+ *
+ * See also the [`async()` function](#async) for more details.
  *
  * Once the promise is fulfilled, this function will return whatever the promise
  * resolved to.
@@ -60,7 +208,7 @@ function async(callable $function): callable
  *
  * ```php
  * try {
- *     $result = React\Async\await($promise, $loop);
+ *     $result = React\Async\await($promise);
  *     // promise successfully fulfilled with $result
  *     echo 'Result: ' . $result;
  * } catch (Throwable $e) {
@@ -162,10 +310,11 @@ function await(PromiseInterface $promise): mixed
  * promise is fulfilled with. If the promise is rejected, it will throw an
  * `Exception` or `Throwable`.
  *
- * The `coroutine()` function will always return a Proimise which will be
+ * The `coroutine()` function will always return a Promise which will be
  * fulfilled with whatever your `$function` returns. Likewise, it will return
  * a promise that will be rejected if you throw an `Exception` or `Throwable`
- * from your `$function`. This allows you easily create Promise-based functions:
+ * from your `$function`. This allows you to easily create Promise-based
+ * functions:
  *
  * ```php
  * $promise = React\Async\coroutine(function () {
