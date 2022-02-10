@@ -24,7 +24,7 @@ final class SimpleFiber implements FiberInterface
             return;
         }
 
-        Loop::futureTick(fn() => $this->fiber->resume($value));
+        $this->fiber->resume($value);
     }
 
     public function throw(\Throwable $throwable): void
@@ -34,7 +34,7 @@ final class SimpleFiber implements FiberInterface
             return;
         }
 
-        Loop::futureTick(fn() => $this->fiber->throw($throwable));
+        $this->fiber->throw($throwable);
     }
 
     public function suspend(): mixed

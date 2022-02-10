@@ -4,6 +4,7 @@ namespace React\Tests\Async;
 
 use React;
 use React\EventLoop\Loop;
+use React\Promise\Deferred;
 use React\Promise\Promise;
 use function React\Async\async;
 use function React\Async\await;
@@ -82,6 +83,49 @@ class AsyncTest extends TestCase
         })();
 
         $promise->then($this->expectCallableNever(), $this->expectCallableNever());
+    }
+
+    public function testAsyncWithAwaitReturnsReturnsPromiseFulfilledWithValueImmediatelyWhenPromiseIsFulfilled()
+    {
+        $deferred = new Deferred();
+
+        $promise = async(function () use ($deferred) {
+            return await($deferred->promise());
+        })();
+
+        $return = null;
+        $promise->then(function ($value) use (&$return) {
+            $return = $value;
+        });
+
+        $this->assertNull($return);
+
+        $deferred->resolve(42);
+
+        $this->assertEquals(42, $return);
+    }
+
+    public function testAsyncWithAwaitReturnsPromiseRejectedWithExceptionImmediatelyWhenPromiseIsRejected()
+    {
+        $deferred = new Deferred();
+
+        $promise = async(function () use ($deferred) {
+            return await($deferred->promise());
+        })();
+
+        $exception = null;
+        $promise->then(null, function ($reason) use (&$exception) {
+            $exception = $reason;
+        });
+
+        $this->assertNull($exception);
+
+        $deferred->reject(new \RuntimeException('Test', 42));
+
+        $this->assertInstanceof(\RuntimeException::class, $exception);
+        assert($exception instanceof \RuntimeException);
+        $this->assertEquals('Test', $exception->getMessage());
+        $this->assertEquals(42, $exception->getCode());
     }
 
     public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsAfterAwaitingPromise()

@@ -25,6 +25,27 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
+    public function testAwaitThrowsExceptionWithoutRunningLoop(callable $await)
+    {
+        $now = true;
+        Loop::futureTick(function () use (&$now) {
+            $now = false;
+        });
+
+        $promise = new Promise(function () {
+            throw new \Exception('test');
+        });
+
+        try {
+            $await($promise);
+        } catch (\Exception $e) {
+            $this->assertTrue($now);
+        }
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
     public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithFalse(callable $await)
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
@@ -89,6 +110,24 @@ class AwaitTest extends TestCase
         });
 
         $this->assertEquals(42, $await($promise));
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitReturnsValueImmediatelyWithoutRunningLoop(callable $await)
+    {
+        $now = true;
+        Loop::futureTick(function () use (&$now) {
+            $now = false;
+        });
+
+        $promise = new Promise(function ($resolve) {
+            $resolve(42);
+        });
+
+        $this->assertEquals(42, $await($promise));
+        $this->assertTrue($now);
     }
 
     /**
