@@ -246,6 +246,25 @@ function await(PromiseInterface $promise): mixed
                 $throwable = new \UnexpectedValueException(
                     'Promise rejected with unexpected value of type ' . (is_object($throwable) ? get_class($throwable) : gettype($throwable))
                 );
+
+                // avoid garbage references by replacing all closures in call stack.
+                // what a lovely piece of code!
+                $r = new \ReflectionProperty('Exception', 'trace');
+                $trace = $r->getValue($throwable);
+
+                // Exception trace arguments only available when zend.exception_ignore_args is not set
+                // @codeCoverageIgnoreStart
+                foreach ($trace as $ti => $one) {
+                    if (isset($one['args'])) {
+                        foreach ($one['args'] as $ai => $arg) {
+                            if ($arg instanceof \Closure) {
+                                $trace[$ti]['args'][$ai] = 'Object(' . \get_class($arg) . ')';
+                            }
+                        }
+                    }
+                }
+                // @codeCoverageIgnoreEnd
+                $r->setValue($throwable, $trace);
             }
 
             if ($fiber === null) {
