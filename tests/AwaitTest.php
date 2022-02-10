@@ -53,9 +53,15 @@ class AwaitTest extends TestCase
             $reject(null);
         });
 
-        $this->expectException(\UnexpectedValueException::class);
-        $this->expectExceptionMessage('Promise rejected with unexpected value of type NULL');
-        $await($promise);
+        try {
+            $await($promise);
+        } catch (\UnexpectedValueException $exception) {
+            $this->assertInstanceOf(\UnexpectedValueException::class, $exception);
+            $this->assertEquals('Promise rejected with unexpected value of type NULL', $exception->getMessage());
+            $this->assertEquals(0, $exception->getCode());
+            $this->assertNull($exception->getPrevious());
+            $this->assertNotEquals('', $exception->getTraceAsString());
+        }
     }
 
     /**
