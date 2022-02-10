@@ -8,25 +8,35 @@ use React\Promise\Promise;
 use function React\Async\async;
 use function React\Async\await;
 use function React\Promise\all;
+use function React\Promise\reject;
+use function React\Promise\resolve;
 
 class AsyncTest extends TestCase
 {
-    public function testAsyncReturnsPendingPromise()
+    public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsValue()
     {
         $promise = async(function () {
             return 42;
         })();
 
-        $promise->then($this->expectCallableNever(), $this->expectCallableNever());
+        $value = null;
+        $promise->then(function ($v) use (&$value) {
+            $value = $v;
+        });
+
+        $this->assertEquals(42, $value);
     }
 
-    public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturns()
+    public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsPromiseThatFulfillsWithValue()
     {
         $promise = async(function () {
-            return 42;
+            return resolve(42);
         })();
 
-        $value = await($promise);
+        $value = null;
+        $promise->then(function ($v) use (&$value) {
+            $value = $v;
+        });
 
         $this->assertEquals(42, $value);
     }
@@ -37,10 +47,41 @@ class AsyncTest extends TestCase
             throw new \RuntimeException('Foo', 42);
         })();
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Foo');
-        $this->expectExceptionCode(42);
-        await($promise);
+        $exception = null;
+        $promise->then(null, function ($reason) use (&$exception) {
+            $exception = $reason;
+        });
+
+        assert($exception instanceof \RuntimeException);
+        $this->assertInstanceOf(\RuntimeException::class, $exception);
+        $this->assertEquals('Foo', $exception->getMessage());
+        $this->assertEquals(42, $exception->getCode());
+    }
+
+    public function testAsyncReturnsPromiseThatRejectsWithExceptionWhenCallbackReturnsPromiseThatRejectsWithException()
+    {
+        $promise = async(function () {
+            return reject(new \RuntimeException('Foo', 42));
+        })();
+
+        $exception = null;
+        $promise->then(null, function ($reason) use (&$exception) {
+            $exception = $reason;
+        });
+
+        assert($exception instanceof \RuntimeException);
+        $this->assertInstanceOf(\RuntimeException::class, $exception);
+        $this->assertEquals('Foo', $exception->getMessage());
+        $this->assertEquals(42, $exception->getCode());
+    }
+
+    public function testAsyncReturnsPendingPromiseWhenCallbackReturnsPendingPromise()
+    {
+        $promise = async(function () {
+            return new Promise(function () { });
+        })();
+
+        $promise->then($this->expectCallableNever(), $this->expectCallableNever());
     }
 
     public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsAfterAwaitingPromise()
