@@ -13,6 +13,16 @@ to have an actual event loop and non-blocking libraries interacting with that
 event loop for it to work. As long as you have a Promise-based API that runs in
 an event loop, it can be used with this library.
 
+> **Development version:** This branch contains the code for the upcoming 4.0
+> release which will be the way forward for this package. However, we will still
+> actively support 3.0 and 2.0 for those not yet on PHP 8.1+.
+>
+> If you're using an older PHP version, you may use the
+> [`3.x` branch](https://github.com/reactphp/async/tree/3.x) (PHP 7.1+) or
+> [`2.x` branch](https://github.com/reactphp/async/tree/2.x) (PHP 5.3+) which both
+> provide a compatible API but do not take advantage of newer language features.
+> See also [installation instructions](#install) for more details.
+
 **Table of Contents**
 
 * [Usage](#usage)
@@ -487,7 +497,7 @@ Once released, this project will follow [SemVer](https://semver.org/).
 At the moment, this will install the latest development version:
 
 ```bash
-$ composer require react/async:dev-main
+$ composer require react/async:^4@dev
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
@@ -502,7 +512,11 @@ smooth upgrade path. If you're using an older PHP version, you may use the
 [`2.x` branch](https://github.com/reactphp/async/tree/2.x) (PHP 5.3+) which both
 provide a compatible API but do not take advantage of newer language features.
 You may target multiple versions at the same time to support a wider range of
-PHP versions.
+PHP versions like this:
+
+```bash
+$ composer require "react/async:^4@dev || ^3@dev || ^2@dev"
+```
 
 ## Tests
 
