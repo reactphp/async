@@ -143,6 +143,22 @@ class AsyncTest extends TestCase
         $this->assertEquals(42, $value);
     }
 
+    public function testAsyncReturnsPromiseThatRejectsWithExceptionWhenCallbackThrowsAfterAwaitingPromise()
+    {
+        $promise = async(function () {
+            $promise = new Promise(function ($_, $reject) {
+                Loop::addTimer(0.001, fn () => $reject(new \RuntimeException('Foo', 42)));
+            });
+
+            return await($promise);
+        })();
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Foo');
+        $this->expectExceptionCode(42);
+        await($promise);
+    }
+
     public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsAfterAwaitingTwoConcurrentPromises()
     {
         $promise1 = async(function () {

@@ -4,6 +4,7 @@ namespace React\Tests\Async;
 
 use React;
 use React\EventLoop\Loop;
+use React\Promise\Deferred;
 use React\Promise\Promise;
 
 class AwaitTest extends TestCase
@@ -40,6 +41,30 @@ class AwaitTest extends TestCase
             $await($promise);
         } catch (\Exception $e) {
             $this->assertTrue($now);
+        }
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitThrowsExceptionImmediatelyWhenPromiseIsRejected(callable $await)
+    {
+        $deferred = new Deferred();
+
+        $ticks = 0;
+        Loop::futureTick(function () use (&$ticks) {
+            ++$ticks;
+            Loop::futureTick(function () use (&$ticks) {
+                ++$ticks;
+            });
+        });
+
+        Loop::futureTick(fn() => $deferred->reject(new \RuntimeException()));
+
+        try {
+            $await($deferred->promise());
+        } catch (\RuntimeException $e) {
+            $this->assertEquals(1, $ticks);
         }
     }
 
@@ -128,6 +153,27 @@ class AwaitTest extends TestCase
 
         $this->assertEquals(42, $await($promise));
         $this->assertTrue($now);
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitReturnsValueImmediatelyWhenPromiseIsFulfilled(callable $await)
+    {
+        $deferred = new Deferred();
+
+        $ticks = 0;
+        Loop::futureTick(function () use (&$ticks) {
+            ++$ticks;
+            Loop::futureTick(function () use (&$ticks) {
+                ++$ticks;
+            });
+        });
+
+        Loop::futureTick(fn() => $deferred->resolve(42));
+
+        $this->assertEquals(42, $await($deferred->promise()));
+        $this->assertEquals(1, $ticks);
     }
 
     /**

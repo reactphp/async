@@ -20,7 +20,11 @@ final class SimpleFiber implements FiberInterface
     public function resume(mixed $value): void
     {
         if ($this->fiber === null) {
-            Loop::futureTick(static fn() => \Fiber::suspend(static fn() => $value));
+            if (\Fiber::getCurrent() !== self::$scheduler) {
+                Loop::futureTick(static fn() => \Fiber::suspend(static fn() => $value));
+            } else {
+                \Fiber::suspend(static fn() => $value);
+            }
             return;
         }
 
@@ -30,7 +34,11 @@ final class SimpleFiber implements FiberInterface
     public function throw(\Throwable $throwable): void
     {
         if ($this->fiber === null) {
-            Loop::futureTick(static fn() => \Fiber::suspend(static fn() => throw $throwable));
+            if (\Fiber::getCurrent() !== self::$scheduler) {
+                Loop::futureTick(static fn() => \Fiber::suspend(static fn() => throw $throwable));
+            } else {
+                \Fiber::suspend(static fn() => throw $throwable);
+            }
             return;
         }
 
