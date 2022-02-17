@@ -20,19 +20,13 @@ final class SimpleFiber implements FiberInterface
 
     public function resume(mixed $value): void
     {
-        if ($this->fiber === null) {
-            $suspend = static fn() => $value;
-            if (\Fiber::getCurrent() !== self::$scheduler) {
-                self::$suspend = $suspend;
-            } else {
-                \Fiber::suspend($suspend);
-            }
-            return;
+        if ($this->fiber !== null) {
+            $this->fiber->resume($value);
+        } else {
+            self::$suspend = static fn() => $value;
         }
 
-        $this->fiber->resume($value);
-
-        if (self::$suspend) {
+        if (self::$suspend !== null && \Fiber::getCurrent() === self::$scheduler) {
             $suspend = self::$suspend;
             self::$suspend = null;
 
@@ -42,19 +36,13 @@ final class SimpleFiber implements FiberInterface
 
     public function throw(\Throwable $throwable): void
     {
-        if ($this->fiber === null) {
-            $suspend = static fn() => throw $throwable;
-            if (\Fiber::getCurrent() !== self::$scheduler) {
-                self::$suspend = $suspend;
-            } else {
-                \Fiber::suspend($suspend);
-            }
-            return;
+        if ($this->fiber !== null) {
+            $this->fiber->throw($throwable);
+        } else {
+            self::$suspend = static fn() => throw $throwable;
         }
 
-        $this->fiber->throw($throwable);
-
-        if (self::$suspend) {
+        if (self::$suspend !== null && \Fiber::getCurrent() === self::$scheduler) {
             $suspend = self::$suspend;
             self::$suspend = null;
 
