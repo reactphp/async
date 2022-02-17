@@ -6,6 +6,7 @@ use React;
 use React\EventLoop\Loop;
 use React\Promise\Deferred;
 use React\Promise\Promise;
+use function React\Async\async;
 
 class AwaitTest extends TestCase
 {
@@ -63,6 +64,34 @@ class AwaitTest extends TestCase
 
         try {
             $await($deferred->promise());
+        } catch (\RuntimeException $e) {
+            $this->assertEquals(1, $ticks);
+        }
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitAsyncThrowsExceptionImmediatelyWhenPromiseIsRejected(callable $await)
+    {
+        $deferred = new Deferred();
+
+        $ticks = 0;
+        Loop::futureTick(function () use (&$ticks) {
+            ++$ticks;
+            Loop::futureTick(function () use (&$ticks) {
+                ++$ticks;
+            });
+        });
+
+        Loop::futureTick(fn() => $deferred->reject(new \RuntimeException()));
+
+        $promise = async(function () use ($deferred, $await) {
+            return $await($deferred->promise());
+        })();
+
+        try {
+            $await($promise);
         } catch (\RuntimeException $e) {
             $this->assertEquals(1, $ticks);
         }
@@ -173,6 +202,31 @@ class AwaitTest extends TestCase
         Loop::futureTick(fn() => $deferred->resolve(42));
 
         $this->assertEquals(42, $await($deferred->promise()));
+        $this->assertEquals(1, $ticks);
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitAsyncReturnsValueImmediatelyWhenPromiseIsFulfilled(callable $await)
+    {
+        $deferred = new Deferred();
+
+        $ticks = 0;
+        Loop::futureTick(function () use (&$ticks) {
+            ++$ticks;
+            Loop::futureTick(function () use (&$ticks) {
+                ++$ticks;
+            });
+        });
+
+        Loop::futureTick(fn() => $deferred->resolve(42));
+
+        $promise = async(function () use ($deferred, $await) {
+            return $await($deferred->promise());
+        })();
+
+        $this->assertEquals(42, $await($promise));
         $this->assertEquals(1, $ticks);
     }
 
