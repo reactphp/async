@@ -164,7 +164,7 @@ function async(callable $function): callable
             }
         });
 
-        Loop::futureTick(static fn() => $fiber->start());
+        $fiber->start();
     });
 }
 
