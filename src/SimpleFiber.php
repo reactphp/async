@@ -10,6 +10,7 @@ use React\EventLoop\Loop;
 final class SimpleFiber implements FiberInterface
 {
     private static ?\Fiber $scheduler = null;
+    private static ?\Closure $suspend = null;
     private ?\Fiber $fiber = null;
 
     public function __construct()
@@ -19,22 +20,34 @@ final class SimpleFiber implements FiberInterface
 
     public function resume(mixed $value): void
     {
-        if ($this->fiber === null) {
-            Loop::futureTick(static fn() => \Fiber::suspend(static fn() => $value));
-            return;
+        if ($this->fiber !== null) {
+            $this->fiber->resume($value);
+        } else {
+            self::$suspend = static fn() => $value;
         }
 
-        Loop::futureTick(fn() => $this->fiber->resume($value));
+        if (self::$suspend !== null && \Fiber::getCurrent() === self::$scheduler) {
+            $suspend = self::$suspend;
+            self::$suspend = null;
+
+            \Fiber::suspend($suspend);
+        }
     }
 
     public function throw(\Throwable $throwable): void
     {
-        if ($this->fiber === null) {
-            Loop::futureTick(static fn() => \Fiber::suspend(static fn() => throw $throwable));
-            return;
+        if ($this->fiber !== null) {
+            $this->fiber->throw($throwable);
+        } else {
+            self::$suspend = static fn() => throw $throwable;
         }
 
-        Loop::futureTick(fn() => $this->fiber->throw($throwable));
+        if (self::$suspend !== null && \Fiber::getCurrent() === self::$scheduler) {
+            $suspend = self::$suspend;
+            self::$suspend = null;
+
+            \Fiber::suspend($suspend);
+        }
     }
 
     public function suspend(): mixed

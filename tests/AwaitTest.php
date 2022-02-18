@@ -4,7 +4,9 @@ namespace React\Tests\Async;
 
 use React;
 use React\EventLoop\Loop;
+use React\Promise\Deferred;
 use React\Promise\Promise;
+use function React\Async\async;
 
 class AwaitTest extends TestCase
 {
@@ -20,6 +22,79 @@ class AwaitTest extends TestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('test');
         $await($promise);
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitThrowsExceptionWithoutRunningLoop(callable $await)
+    {
+        $now = true;
+        Loop::futureTick(function () use (&$now) {
+            $now = false;
+        });
+
+        $promise = new Promise(function () {
+            throw new \Exception('test');
+        });
+
+        try {
+            $await($promise);
+        } catch (\Exception $e) {
+            $this->assertTrue($now);
+        }
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitThrowsExceptionImmediatelyWhenPromiseIsRejected(callable $await)
+    {
+        $deferred = new Deferred();
+
+        $ticks = 0;
+        Loop::futureTick(function () use (&$ticks) {
+            ++$ticks;
+            Loop::futureTick(function () use (&$ticks) {
+                ++$ticks;
+            });
+        });
+
+        Loop::futureTick(fn() => $deferred->reject(new \RuntimeException()));
+
+        try {
+            $await($deferred->promise());
+        } catch (\RuntimeException $e) {
+            $this->assertEquals(1, $ticks);
+        }
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitAsyncThrowsExceptionImmediatelyWhenPromiseIsRejected(callable $await)
+    {
+        $deferred = new Deferred();
+
+        $ticks = 0;
+        Loop::futureTick(function () use (&$ticks) {
+            ++$ticks;
+            Loop::futureTick(function () use (&$ticks) {
+                ++$ticks;
+            });
+        });
+
+        Loop::futureTick(fn() => $deferred->reject(new \RuntimeException()));
+
+        $promise = async(function () use ($deferred, $await) {
+            return $await($deferred->promise());
+        })();
+
+        try {
+            $await($promise);
+        } catch (\RuntimeException $e) {
+            $this->assertEquals(1, $ticks);
+        }
     }
 
     /**
@@ -89,6 +164,70 @@ class AwaitTest extends TestCase
         });
 
         $this->assertEquals(42, $await($promise));
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitReturnsValueImmediatelyWithoutRunningLoop(callable $await)
+    {
+        $now = true;
+        Loop::futureTick(function () use (&$now) {
+            $now = false;
+        });
+
+        $promise = new Promise(function ($resolve) {
+            $resolve(42);
+        });
+
+        $this->assertEquals(42, $await($promise));
+        $this->assertTrue($now);
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitReturnsValueImmediatelyWhenPromiseIsFulfilled(callable $await)
+    {
+        $deferred = new Deferred();
+
+        $ticks = 0;
+        Loop::futureTick(function () use (&$ticks) {
+            ++$ticks;
+            Loop::futureTick(function () use (&$ticks) {
+                ++$ticks;
+            });
+        });
+
+        Loop::futureTick(fn() => $deferred->resolve(42));
+
+        $this->assertEquals(42, $await($deferred->promise()));
+        $this->assertEquals(1, $ticks);
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitAsyncReturnsValueImmediatelyWhenPromiseIsFulfilled(callable $await)
+    {
+        $deferred = new Deferred();
+
+        $ticks = 0;
+        Loop::futureTick(function () use (&$ticks) {
+            ++$ticks;
+            Loop::futureTick(function () use (&$ticks) {
+                ++$ticks;
+            });
+        });
+
+        Loop::futureTick(fn() => $deferred->resolve(42));
+
+        $promise = async(function () use ($deferred, $await) {
+            return $await($deferred->promise());
+        })();
+
+        $this->assertEquals(42, $await($promise));
+        $this->assertEquals(1, $ticks);
     }
 
     /**
