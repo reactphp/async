@@ -56,18 +56,25 @@ function await(PromiseInterface $promise)
     $resolved = null;
     $exception = null;
     $rejected = false;
+    $loopStarted = false;
 
     $promise->then(
-        function ($c) use (&$resolved, &$wait) {
+        function ($c) use (&$resolved, &$wait, &$loopStarted) {
             $resolved = $c;
             $wait = false;
-            Loop::stop();
+
+            if ($loopStarted) {
+                Loop::stop();
+            }
         },
-        function ($error) use (&$exception, &$rejected, &$wait) {
+        function ($error) use (&$exception, &$rejected, &$wait, &$loopStarted) {
             $exception = $error;
             $rejected = true;
             $wait = false;
-            Loop::stop();
+
+            if ($loopStarted) {
+                Loop::stop();
+            }
         }
     );
 
@@ -76,6 +83,7 @@ function await(PromiseInterface $promise)
     $promise = null;
 
     while ($wait) {
+        $loopStarted = true;
         Loop::run();
     }
 
