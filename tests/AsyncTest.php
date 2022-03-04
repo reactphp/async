@@ -11,6 +11,7 @@ use function React\Async\await;
 use function React\Promise\all;
 use function React\Promise\reject;
 use function React\Promise\resolve;
+use function React\Promise\Timer\sleep;
 
 class AsyncTest extends TestCase
 {
@@ -184,5 +185,109 @@ class AsyncTest extends TestCase
         $this->assertEquals([21, 42], $values);
         $this->assertGreaterThan(0.1, $time);
         $this->assertLessThan(0.12, $time);
+    }
+
+    public function testCancel()
+    {
+        self::expectOutputString('a');
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Timer cancelled');
+
+        $promise = async(static function (): int {
+            echo 'a';
+            await(sleep(2));
+            echo 'b';
+
+            return time();
+        })();
+
+        $promise->cancel();
+        await($promise);
+    }
+
+    public function testCancelTryCatch()
+    {
+        self::expectOutputString('ab');
+
+        $promise = async(static function (): int {
+            echo 'a';
+            try {
+                await(sleep(2));
+            } catch (\Throwable) {
+                // No-Op
+            }
+            echo 'b';
+
+            return time();
+        })();
+
+        $promise->cancel();
+        await($promise);
+    }
+
+    public function testNestedCancel()
+    {
+        self::expectOutputString('abc');
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Timer cancelled');
+
+        $promise = async(static function (): int {
+            echo 'a';
+            await(async(static function(): void {
+                echo 'b';
+                await(async(static function(): void {
+                    echo 'c';
+                    await(sleep(2));
+                    echo 'd';
+                })());
+                echo 'e';
+            })());
+            echo 'f';
+
+            return time();
+        })();
+
+        $promise->cancel();
+        await($promise);
+    }
+
+    public function testCancelFiberThatCatchesExceptions()
+    {
+        self::expectOutputString('ab');
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Timer cancelled');
+
+        $promise = async(static function (): int {
+            echo 'a';
+            try {
+                await(sleep(2));
+            } catch (\Throwable) {
+                // No-Op
+            }
+            echo 'b';
+            await(sleep(0.1));
+            echo 'c';
+
+            return time();
+        })();
+
+        $promise->cancel();
+        await($promise);
+    }
+
+    public function testNotAwaitedPromiseWillNotBeCanceled()
+    {
+        self::expectOutputString('acb');
+
+        async(static function (): int {
+            echo 'a';
+            sleep(0.001)->then(static function (): void {
+                echo 'b';
+            });
+            echo 'c';
+
+            return time();
+        })()->cancel();
+        Loop::run();
     }
 }

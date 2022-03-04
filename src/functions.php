@@ -148,6 +148,31 @@ use function React\Promise\resolve;
  * });
  * ```
  *
+ * Promises returned by `async()` can be cancelled, and when done any currently
+ * and future awaited promise inside that and any nested fibers with their
+ * awaited promises will also be cancelled. As such the following example will
+ * only output `ab` as the [`sleep()`](https://reactphp.org/promise-timer/#sleep)
+ * between `a` and `b` is cancelled throwing a timeout exception that bubbles up
+ * through the fibers ultimately to the end user through the [`await()`](#await)
+ * on the last line of the example.
+ *
+ * ```php
+ * $promise = async(static function (): int {
+ *     echo 'a';
+ *     await(async(static function(): void {
+ *         echo 'b';
+ *         await(sleep(2));
+ *         echo 'c';
+ *     })());
+ *     echo 'd';
+ *
+ *     return time();
+ * })();
+ *
+ * $promise->cancel();
+ * await($promise);
+ * ```
+ *
  * @param callable(mixed ...$args):mixed $function
  * @return callable(): PromiseInterface<mixed>
  * @since 4.0.0
@@ -155,17 +180,37 @@ use function React\Promise\resolve;
  */
 function async(callable $function): callable
 {
-    return static fn (mixed ...$args): PromiseInterface => new Promise(function (callable $resolve, callable $reject) use ($function, $args): void {
-        $fiber = new \Fiber(function () use ($resolve, $reject, $function, $args): void {
-            try {
-                $resolve($function(...$args));
-            } catch (\Throwable $exception) {
-                $reject($exception);
+    return static function (mixed ...$args) use ($function): PromiseInterface {
+        $fiber = null;
+        $promise = new Promise(function (callable $resolve, callable $reject) use ($function, $args, &$fiber): void {
+            $fiber = new \Fiber(function () use ($resolve, $reject, $function, $args, &$fiber): void {
+                try {
+                    $resolve($function(...$args));
+                } catch (\Throwable $exception) {
+                    $reject($exception);
+                } finally {
+                    FiberMap::unregister($fiber);
+                }
+            });
+
+            FiberMap::register($fiber);
+
+            $fiber->start();
+        }, function () use (&$fiber): void {
+            FiberMap::cancel($fiber);
+            $promise = FiberMap::getPromise($fiber);
+            if ($promise instanceof CancellablePromiseInterface) {
+                $promise->cancel();
             }
         });
 
-        $fiber->start();
-    });
+        $lowLevelFiber = \Fiber::getCurrent();
+        if ($lowLevelFiber !== null) {
+            FiberMap::setPromise($lowLevelFiber, $promise);
+        }
+
+        return $promise;
+    };
 }
 
 
@@ -230,9 +275,18 @@ function await(PromiseInterface $promise): mixed
     $rejected = false;
     $resolvedValue = null;
     $rejectedThrowable = null;
+    $lowLevelFiber = \Fiber::getCurrent();
+
+    if ($lowLevelFiber !== null && FiberMap::isCancelled($lowLevelFiber) && $promise instanceof CancellablePromiseInterface) {
+        $promise->cancel();
+    }
 
     $promise->then(
-        function (mixed $value) use (&$resolved, &$resolvedValue, &$fiber): void {
+        function (mixed $value) use (&$resolved, &$resolvedValue, &$fiber, $lowLevelFiber, $promise): void {
+            if ($lowLevelFiber !== null) {
+                FiberMap::unsetPromise($lowLevelFiber, $promise);
+            }
+
             if ($fiber === null) {
                 $resolved = true;
                 $resolvedValue = $value;
@@ -241,7 +295,11 @@ function await(PromiseInterface $promise): mixed
 
             $fiber->resume($value);
         },
-        function (mixed $throwable) use (&$rejected, &$rejectedThrowable, &$fiber): void {
+        function (mixed $throwable) use (&$rejected, &$rejectedThrowable, &$fiber, $lowLevelFiber, $promise): void {
+            if ($lowLevelFiber !== null) {
+                FiberMap::unsetPromise($lowLevelFiber, $promise);
+            }
+
             if (!$throwable instanceof \Throwable) {
                 $throwable = new \UnexpectedValueException(
                     'Promise rejected with unexpected value of type ' . (is_object($throwable) ? get_class($throwable) : gettype($throwable))
@@ -283,6 +341,10 @@ function await(PromiseInterface $promise): mixed
 
     if ($rejected) {
         throw $rejectedThrowable;
+    }
+
+    if ($lowLevelFiber !== null) {
+        FiberMap::setPromise($lowLevelFiber, $promise);
     }
 
     $fiber = FiberFactory::create();
