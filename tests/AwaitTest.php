@@ -100,6 +100,27 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
+    public function testAwaitThrowsExceptionImmediatelyInCustomFiberWhenPromiseIsRejected(callable $await)
+    {
+        $fiber = new \Fiber(function () use ($await) {
+            $promise = new Promise(function ($resolve) {
+                throw new \RuntimeException('Test');
+            });
+
+            return $await($promise);
+        });
+
+        try {
+            $fiber->start();
+        } catch (\RuntimeException $e) {
+            $this->assertTrue($fiber->isTerminated());
+            $this->assertEquals('Test', $e->getMessage());
+        }
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
     public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithFalse(callable $await)
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
@@ -228,6 +249,25 @@ class AwaitTest extends TestCase
 
         $this->assertEquals(42, $await($promise));
         $this->assertEquals(1, $ticks);
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitReturnsValueImmediatelyInCustomFiberWhenPromiseIsFulfilled(callable $await)
+    {
+        $fiber = new \Fiber(function () use ($await) {
+            $promise = new Promise(function ($resolve) {
+                $resolve(42);
+            });
+
+            return $await($promise);
+        });
+
+        $fiber->start();
+
+        $this->assertTrue($fiber->isTerminated());
+        $this->assertEquals(42, $fiber->getReturn());
     }
 
     /**

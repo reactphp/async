@@ -25,7 +25,7 @@ final class FiberMap
 
     public static function isCancelled(\Fiber $fiber): bool
     {
-        return self::$status[\spl_object_id($fiber)];
+        return self::$status[\spl_object_id($fiber)] ?? false;
     }
 
     public static function setPromise(\Fiber $fiber, PromiseInterface $promise): void
