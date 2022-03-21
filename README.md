@@ -1,6 +1,7 @@
 # Async
 
 [![CI status](https://github.com/reactphp/async/workflows/CI/badge.svg)](https://github.com/reactphp/async/actions)
+[![installs on Packagist](https://img.shields.io/packagist/dt/react/async?color=blue&label=installs%20on%20Packagist)](https://packagist.org/packages/react/async)
 
 Async utilities for [ReactPHP](https://reactphp.org/).
 
