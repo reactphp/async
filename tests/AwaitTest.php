@@ -413,7 +413,7 @@ class AwaitTest extends TestCase
         })());
     }
 
-    /** @return iterable<string,list<callable(PromiseInterface): mixed>> */
+    /** @return iterable<string,list<callable(PromiseInterface<mixed>): mixed>> */
     public function provideAwaiters(): iterable
     {
         yield 'await' => [static fn (React\Promise\PromiseInterface $promise): mixed => React\Async\await($promise)];
