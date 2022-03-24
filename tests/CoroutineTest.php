@@ -22,7 +22,7 @@ class CoroutineTest extends TestCase
     {
         $promise = coroutine(function () {
             if (false) { // @phpstan-ignore-line
-                yield;
+                yield resolve(null);
             }
             return 42;
         });
@@ -53,7 +53,7 @@ class CoroutineTest extends TestCase
     {
         $promise = coroutine(function () {
             if (false) { // @phpstan-ignore-line
-                yield;
+                yield resolve(null);
             }
             throw new \RuntimeException('Foo');
         });
@@ -99,7 +99,7 @@ class CoroutineTest extends TestCase
 
     public function testCoroutineReturnsRejectedPromiseIfFunctionYieldsInvalidValue(): void
     {
-        $promise = coroutine(function () {
+        $promise = coroutine(function () { // @phpstan-ignore-line
             yield 42;
         });
 
@@ -169,7 +169,7 @@ class CoroutineTest extends TestCase
 
         $promise = coroutine(function () {
             if (false) { // @phpstan-ignore-line
-                yield;
+                yield resolve(null);
             }
             return 42;
         });
@@ -249,7 +249,7 @@ class CoroutineTest extends TestCase
 
         gc_collect_cycles();
 
-        $promise = coroutine(function () {
+        $promise = coroutine(function () { // @phpstan-ignore-line
             yield 42;
         });
 
