@@ -106,42 +106,53 @@ class CoroutineTest extends TestCase
         $promise->then(null, $this->expectCallableOnceWith(new \UnexpectedValueException('Expected coroutine to yield React\Promise\PromiseInterface, but got integer')));
     }
 
-
-    public function testCoroutineWillCancelPendingPromiseWhenCallingCancelOnResultingPromise()
-    {
-        $cancelled = 0;
-        $promise = coroutine(function () use (&$cancelled) {
-            yield new Promise(function () use (&$cancelled) {
-                ++$cancelled;
-            });
-        });
-
-        $promise->cancel();
-
-        $this->assertEquals(1, $cancelled);
-    }
-
-    public function testCoroutineWillCancelAllPendingPromisesWhenFunctionContinuesToYieldWhenCallingCancelOnResultingPromise()
+    public function testCancelCoroutineWillReturnRejectedPromiseWhenCancellingPendingPromiseRejects()
     {
         $promise = coroutine(function () {
-            $promise = new Promise(function () { }, function () {
-                throw new \RuntimeException('Frist operation cancelled', 21);
-            });
-
-            try {
-                yield $promise;
-            } catch (\RuntimeException $e) {
-                // ignore exception and continue
-            }
-
             yield new Promise(function () { }, function () {
-                throw new \RuntimeException('Second operation cancelled', 42);
+                throw new \RuntimeException('Operation cancelled');
             });
         });
 
         $promise->cancel();
 
-        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Second operation cancelled', 42)));
+        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Operation cancelled')));
+    }
+
+    public function testCancelCoroutineWillReturnFulfilledPromiseWhenCancellingPendingPromiseRejectsInsideCatchThatReturnsValue()
+    {
+        $promise = coroutine(function () {
+            try {
+                yield new Promise(function () { }, function () {
+                    throw new \RuntimeException('Operation cancelled');
+                });
+            } catch (\RuntimeException $e) {
+                return 42;
+            }
+        });
+
+        $promise->cancel();
+
+        $promise->then($this->expectCallableOnceWith(42));
+    }
+
+    public function testCancelCoroutineWillReturnPendigPromiseWhenCancellingFirstPromiseRejectsInsideCatchThatYieldsSecondPromise()
+    {
+        $promise = coroutine(function () {
+            try {
+                yield new Promise(function () { }, function () {
+                    throw new \RuntimeException('First operation cancelled');
+                });
+            } catch (\RuntimeException $e) {
+                yield new Promise(function () { }, function () {
+                    throw new \RuntimeException('Second operation never cancelled');
+                });
+            }
+        });
+
+        $promise->cancel();
+
+        $promise->then($this->expectCallableNever(), $this->expectCallableNever());
     }
 
     public function testCoroutineShouldNotCreateAnyGarbageReferencesWhenGeneratorReturns()
