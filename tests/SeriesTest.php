@@ -17,6 +17,19 @@ class SeriesTest extends TestCase
         $promise->then($this->expectCallableOnceWith(array()));
     }
 
+    public function testSeriesWithoutTasksFromEmptyGeneratorResolvesWithEmptyArray()
+    {
+        $tasks = (function () {
+            if (false) {
+                yield;
+            }
+        })();
+
+        $promise = React\Async\series($tasks);
+
+        $promise->then($this->expectCallableOnceWith([]));
+    }
+
     public function testSeriesWithTasks()
     {
         $tasks = array(
@@ -35,6 +48,38 @@ class SeriesTest extends TestCase
                 });
             },
         );
+
+        $promise = React\Async\series($tasks);
+
+        $promise->then($this->expectCallableOnceWith(array('foo', 'bar')));
+
+        $timer = new Timer($this);
+        $timer->start();
+
+        Loop::run();
+
+        $timer->stop();
+        $timer->assertInRange(0.10, 0.20);
+    }
+
+    public function testSeriesWithTasksFromGeneratorResolvesWithArrayOfFulfillmentValues()
+    {
+        $tasks = (function () {
+            yield function () {
+                return new Promise(function ($resolve) {
+                    Loop::addTimer(0.051, function () use ($resolve) {
+                        $resolve('foo');
+                    });
+                });
+            };
+            yield function () {
+                return new Promise(function ($resolve) {
+                    Loop::addTimer(0.051, function () use ($resolve) {
+                        $resolve('bar');
+                    });
+                });
+            };
+        })();
 
         $promise = React\Async\series($tasks);
 

@@ -533,10 +533,10 @@ function coroutine(callable $function, mixed ...$args): PromiseInterface
 }
 
 /**
- * @param array<callable():PromiseInterface<mixed,Exception>> $tasks
+ * @param iterable<callable():PromiseInterface<mixed,Exception>> $tasks
  * @return PromiseInterface<array<mixed>,Exception>
  */
-function parallel(array $tasks): PromiseInterface
+function parallel(iterable $tasks): PromiseInterface
 {
     $pending = [];
     $deferred = new Deferred(function () use (&$pending) {
@@ -549,6 +549,10 @@ function parallel(array $tasks): PromiseInterface
     });
     $results = [];
     $errored = false;
+
+    if (!\is_array($tasks)) {
+        $tasks = \iterator_to_array($tasks);
+    }
 
     $numTasks = count($tasks);
     if (0 === $numTasks) {
@@ -591,10 +595,10 @@ function parallel(array $tasks): PromiseInterface
 }
 
 /**
- * @param array<callable():PromiseInterface<mixed,Exception>> $tasks
+ * @param iterable<callable():PromiseInterface<mixed,Exception>> $tasks
  * @return PromiseInterface<array<mixed>,Exception>
  */
-function series(array $tasks): PromiseInterface
+function series(iterable $tasks): PromiseInterface
 {
     $pending = null;
     $deferred = new Deferred(function () use (&$pending) {
@@ -604,6 +608,10 @@ function series(array $tasks): PromiseInterface
         $pending = null;
     });
     $results = [];
+
+    if (!\is_array($tasks)) {
+        $tasks = \iterator_to_array($tasks);
+    }
 
     /** @var callable():void $next */
     $taskCallback = function ($result) use (&$results, &$next) {
@@ -631,10 +639,10 @@ function series(array $tasks): PromiseInterface
 }
 
 /**
- * @param array<callable(mixed=):PromiseInterface<mixed,Exception>> $tasks
+ * @param iterable<callable(mixed=):PromiseInterface<mixed,Exception>> $tasks
  * @return PromiseInterface<mixed,Exception>
  */
-function waterfall(array $tasks): PromiseInterface
+function waterfall(iterable $tasks): PromiseInterface
 {
     $pending = null;
     $deferred = new Deferred(function () use (&$pending) {
@@ -643,6 +651,10 @@ function waterfall(array $tasks): PromiseInterface
         }
         $pending = null;
     });
+
+    if (!\is_array($tasks)) {
+        $tasks = \iterator_to_array($tasks);
+    }
 
     /** @var callable $next */
     $next = function ($value = null) use (&$tasks, &$next, $deferred, &$pending) {
