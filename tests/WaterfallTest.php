@@ -17,6 +17,19 @@ class WaterfallTest extends TestCase
         $promise->then($this->expectCallableOnceWith(null));
     }
 
+    public function testWaterfallWithoutTasksFromEmptyGeneratorResolvesWithNull()
+    {
+        $tasks = (function () {
+            if (false) {
+                yield;
+            }
+        })();
+
+        $promise = React\Async\waterfall($tasks);
+
+        $promise->then($this->expectCallableOnceWith(null));
+    }
+
     public function testWaterfallWithTasks()
     {
         $tasks = array(
@@ -42,6 +55,45 @@ class WaterfallTest extends TestCase
                 });
             },
         );
+
+        $promise = React\Async\waterfall($tasks);
+
+        $promise->then($this->expectCallableOnceWith('foobarbaz'));
+
+        $timer = new Timer($this);
+        $timer->start();
+
+        Loop::run();
+
+        $timer->stop();
+        $timer->assertInRange(0.15, 0.30);
+    }
+
+    public function testWaterfallWithTasksFromGeneratorResolvesWithFinalFulfillmentValue()
+    {
+        $tasks = (function () {
+            yield function ($foo = 'foo') {
+                return new Promise(function ($resolve) use ($foo) {
+                    Loop::addTimer(0.05, function () use ($resolve, $foo) {
+                        $resolve($foo);
+                    });
+                });
+            };
+            yield function ($foo) {
+                return new Promise(function ($resolve) use ($foo) {
+                    Loop::addTimer(0.05, function () use ($resolve, $foo) {
+                        $resolve($foo . 'bar');
+                    });
+                });
+            };
+            yield function ($bar) {
+                return new Promise(function ($resolve) use ($bar) {
+                    Loop::addTimer(0.05, function () use ($resolve, $bar) {
+                        $resolve($bar . 'baz');
+                    });
+                });
+            };
+        })();
 
         $promise = React\Async\waterfall($tasks);
 

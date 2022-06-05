@@ -17,6 +17,19 @@ class ParallelTest extends TestCase
         $promise->then($this->expectCallableOnceWith(array()));
     }
 
+    public function testParallelWithoutTasksFromEmptyGeneratorResolvesWithEmptyArray()
+    {
+        $tasks = (function () {
+            if (false) {
+                yield;
+            }
+        })();
+
+        $promise = React\Async\parallel($tasks);
+
+        $promise->then($this->expectCallableOnceWith([]));
+    }
+
     public function testParallelWithTasks()
     {
         $tasks = array(
@@ -35,6 +48,38 @@ class ParallelTest extends TestCase
                 });
             },
         );
+
+        $promise = React\Async\parallel($tasks);
+
+        $promise->then($this->expectCallableOnceWith(array('foo', 'bar')));
+
+        $timer = new Timer($this);
+        $timer->start();
+
+        Loop::run();
+
+        $timer->stop();
+        $timer->assertInRange(0.1, 0.2);
+    }
+
+    public function testParallelWithTasksFromGeneratorResolvesWithArrayOfFulfillmentValues()
+    {
+        $tasks = (function () {
+            yield function () {
+                return new Promise(function ($resolve) {
+                    Loop::addTimer(0.1, function () use ($resolve) {
+                        $resolve('foo');
+                    });
+                });
+            };
+            yield function () {
+                return new Promise(function ($resolve) {
+                    Loop::addTimer(0.11, function () use ($resolve) {
+                        $resolve('bar');
+                    });
+                });
+            };
+        })();
 
         $promise = React\Async\parallel($tasks);
 
