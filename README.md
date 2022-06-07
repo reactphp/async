@@ -205,18 +205,20 @@ $promise->then(function (int $bytes) {
 });
 ```
 
-Promises returned by `async()` can be cancelled, and when done any currently and future awaited promise inside that and 
-any nested fibers with their awaited promises will also be cancelled. As such the following example will only output 
-`ab` as the [`sleep()`](https://reactphp.org/promise-timer/#sleep) between `a` and `b` is cancelled throwing a timeout 
-exception that bubbles up through the fibers ultimately to the end user through the [`await()`](#await) on the last line 
-of the example.
+The returned promise is implemented in such a way that it can be cancelled
+when it is still pending. Cancelling a pending promise will cancel any awaited
+promises inside that fiber or any nested fibers. As such, the following example
+will only output `ab` and cancel the pending [`sleep()`](https://reactphp.org/promise-timer/#sleep).
+The [`await()`](#await) calls in this example would throw a `RuntimeException`
+from the cancelled [`sleep()`](https://reactphp.org/promise-timer/#sleep) call
+that bubbles up through the fibers.
 
 ```php
 $promise = async(static function (): int {
     echo 'a';
     await(async(static function(): void {
         echo 'b';
-        await(sleep(2));
+        await(React\Promise\Timer\sleep(2));
         echo 'c';
     })());
     echo 'd';

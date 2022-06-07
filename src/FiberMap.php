@@ -23,11 +23,6 @@ final class FiberMap
         self::$status[\spl_object_id($fiber)] = true;
     }
 
-    public static function isCancelled(\Fiber $fiber): bool
-    {
-        return self::$status[\spl_object_id($fiber)] ?? false;
-    }
-
     public static function setPromise(\Fiber $fiber, PromiseInterface $promise): void
     {
         self::$map[\spl_object_id($fiber)] = $promise;
@@ -36,11 +31,6 @@ final class FiberMap
     public static function unsetPromise(\Fiber $fiber, PromiseInterface $promise): void
     {
         unset(self::$map[\spl_object_id($fiber)]);
-    }
-
-    public static function has(\Fiber $fiber): bool
-    {
-        return array_key_exists(\spl_object_id($fiber), self::$map);
     }
 
     public static function getPromise(\Fiber $fiber): ?PromiseInterface

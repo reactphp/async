@@ -379,7 +379,9 @@ class AwaitTest extends TestCase
     {
         $await(async(function () use ($await): int {
             $fiber = \Fiber::getCurrent();
-            $await(React\Promise\Timer\sleep(0.01));
+            $await(new Promise(function ($resolve) {
+                Loop::addTimer(0.01, fn() => $resolve(null));
+            }));
             $this->assertNull(React\Async\FiberMap::getPromise($fiber));
 
             return time();
