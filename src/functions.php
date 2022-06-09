@@ -3,7 +3,6 @@
 namespace React\Async;
 
 use React\EventLoop\Loop;
-use React\Promise\CancellablePromiseInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 
@@ -108,7 +107,7 @@ function parallel(array $tasks)
     $pending = array();
     $deferred = new Deferred(function () use (&$pending) {
         foreach ($pending as $promise) {
-            if ($promise instanceof CancellablePromiseInterface) {
+            if ($promise instanceof PromiseInterface && \method_exists($promise, 'cancel')) {
                 $promise->cancel();
             }
         }
@@ -127,7 +126,7 @@ function parallel(array $tasks)
         $deferred->reject($error);
 
         foreach ($pending as $promise) {
-            if ($promise instanceof CancellablePromiseInterface) {
+            if ($promise instanceof PromiseInterface && \method_exists($promise, 'cancel')) {
                 $promise->cancel();
             }
         }
@@ -165,7 +164,7 @@ function series(array $tasks)
 {
     $pending = null;
     $deferred = new Deferred(function () use (&$pending) {
-        if ($pending instanceof CancellablePromiseInterface) {
+        if ($pending instanceof PromiseInterface && \method_exists($pending, 'cancel')) {
             $pending->cancel();
         }
         $pending = null;
@@ -205,7 +204,7 @@ function waterfall(array $tasks)
 {
     $pending = null;
     $deferred = new Deferred(function () use (&$pending) {
-        if ($pending instanceof CancellablePromiseInterface) {
+        if ($pending instanceof PromiseInterface && \method_exists($pending, 'cancel')) {
             $pending->cancel();
         }
         $pending = null;
