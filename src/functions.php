@@ -297,19 +297,10 @@ function parallel(iterable $tasks): PromiseInterface
         $pending = [];
     });
     $results = [];
-    $errored = false;
+    $continue = true;
 
-    if (!\is_array($tasks)) {
-        $tasks = \iterator_to_array($tasks);
-    }
-
-    $numTasks = count($tasks);
-    if (0 === $numTasks) {
-        $deferred->resolve($results);
-    }
-
-    $taskErrback = function ($error) use (&$pending, $deferred, &$errored) {
-        $errored = true;
+    $taskErrback = function ($error) use (&$pending, $deferred, &$continue) {
+        $continue = false;
         $deferred->reject($error);
 
         foreach ($pending as $promise) {
@@ -321,23 +312,29 @@ function parallel(iterable $tasks): PromiseInterface
     };
 
     foreach ($tasks as $i => $task) {
-        $taskCallback = function ($result) use (&$results, &$pending, $numTasks, $i, $deferred) {
+        $taskCallback = function ($result) use (&$results, &$pending, &$continue, $i, $deferred) {
             $results[$i] = $result;
+            unset($pending[$i]);
 
-            if (count($results) === $numTasks) {
+            if (!$pending && !$continue) {
                 $deferred->resolve($results);
             }
         };
 
-        $promise = call_user_func($task);
+        $promise = \call_user_func($task);
         assert($promise instanceof PromiseInterface);
         $pending[$i] = $promise;
 
         $promise->then($taskCallback, $taskErrback);
 
-        if ($errored) {
+        if (!$continue) {
             break;
         }
+    }
+
+    $continue = false;
+    if (!$pending) {
+        $deferred->resolve($results);
     }
 
     return $deferred->promise();
@@ -358,8 +355,9 @@ function series(iterable $tasks): PromiseInterface
     });
     $results = [];
 
-    if (!\is_array($tasks)) {
-        $tasks = \iterator_to_array($tasks);
+    if ($tasks instanceof \IteratorAggregate) {
+        $tasks = $tasks->getIterator();
+        assert($tasks instanceof \Iterator);
     }
 
     /** @var callable():void $next */
@@ -369,13 +367,19 @@ function series(iterable $tasks): PromiseInterface
     };
 
     $next = function () use (&$tasks, $taskCallback, $deferred, &$results, &$pending) {
-        if (0 === count($tasks)) {
+        if ($tasks instanceof \Iterator ? !$tasks->valid() : !$tasks) {
             $deferred->resolve($results);
             return;
         }
 
-        $task = array_shift($tasks);
-        $promise = call_user_func($task);
+        if ($tasks instanceof \Iterator) {
+            $task = $tasks->current();
+            $tasks->next();
+        } else {
+            $task = \array_shift($tasks);
+        }
+
+        $promise = \call_user_func($task);
         assert($promise instanceof PromiseInterface);
         $pending = $promise;
 
@@ -401,19 +405,26 @@ function waterfall(iterable $tasks): PromiseInterface
         $pending = null;
     });
 
-    if (!\is_array($tasks)) {
-        $tasks = \iterator_to_array($tasks);
+    if ($tasks instanceof \IteratorAggregate) {
+        $tasks = $tasks->getIterator();
+        assert($tasks instanceof \Iterator);
     }
 
     /** @var callable $next */
     $next = function ($value = null) use (&$tasks, &$next, $deferred, &$pending) {
-        if (0 === count($tasks)) {
+        if ($tasks instanceof \Iterator ? !$tasks->valid() : !$tasks) {
             $deferred->resolve($value);
             return;
         }
 
-        $task = array_shift($tasks);
-        $promise = call_user_func_array($task, func_get_args());
+        if ($tasks instanceof \Iterator) {
+            $task = $tasks->current();
+            $tasks->next();
+        } else {
+            $task = \array_shift($tasks);
+        }
+
+        $promise = \call_user_func_array($task, func_get_args());
         assert($promise instanceof PromiseInterface);
         $pending = $promise;
 

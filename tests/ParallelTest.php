@@ -5,6 +5,7 @@ namespace React\Tests\Async;
 use React;
 use React\EventLoop\Loop;
 use React\Promise\Promise;
+use function React\Promise\reject;
 
 class ParallelTest extends TestCase
 {
@@ -124,6 +125,25 @@ class ParallelTest extends TestCase
         $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('whoops')));
 
         $this->assertSame(2, $called);
+    }
+
+    public function testParallelWithErrorFromInfiniteGeneratorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks()
+    {
+        $called = 0;
+
+        $tasks = (function () use (&$called) {
+            while (true) {
+                yield function () use (&$called) {
+                    return reject(new \RuntimeException('Rejected ' . ++$called));
+                };
+            }
+        })();
+
+        $promise = React\Async\parallel($tasks);
+
+        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Rejected 1')));
+
+        $this->assertSame(1, $called);
     }
 
     public function testParallelWithErrorWillCancelPendingPromises()
