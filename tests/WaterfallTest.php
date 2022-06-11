@@ -5,6 +5,7 @@ namespace React\Tests\Async;
 use React;
 use React\EventLoop\Loop;
 use React\Promise\Promise;
+use function React\Promise\reject;
 
 class WaterfallTest extends TestCase
 {
@@ -137,6 +138,47 @@ class WaterfallTest extends TestCase
         $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('whoops')));
 
         $this->assertSame(1, $called);
+    }
+
+    public function testWaterfallWithErrorFromInfiniteGeneratorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks()
+    {
+        $called = 0;
+
+        $tasks = (function () use (&$called) {
+            while (true) {
+                yield function () use (&$called) {
+                    return reject(new \RuntimeException('Rejected ' . ++$called));
+                };
+            }
+        })();
+
+        $promise = React\Async\waterfall($tasks);
+
+        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Rejected 1')));
+
+        $this->assertSame(1, $called);
+    }
+
+    public function testWaterfallWithErrorFromInfiniteIteratorAggregateReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks()
+    {
+        $tasks = new class() implements \IteratorAggregate {
+            public $called = 0;
+
+            public function getIterator(): \Iterator
+            {
+                while (true) {
+                    yield function () {
+                        return reject(new \RuntimeException('Rejected ' . ++$this->called));
+                    };
+                }
+            }
+        };
+
+        $promise = React\Async\waterfall($tasks);
+
+        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Rejected 1')));
+
+        $this->assertSame(1, $tasks->called);
     }
 
     public function testWaterfallWillCancelFirstPendingPromiseWhenCallingCancelOnResultingPromise()
