@@ -5,6 +5,7 @@ namespace React\Tests\Async;
 use React;
 use React\EventLoop\Loop;
 use React\Promise\Promise;
+use function React\Promise\reject;
 
 class ParallelTest extends TestCase
 {
@@ -15,6 +16,19 @@ class ParallelTest extends TestCase
         $promise = React\Async\parallel($tasks);
 
         $promise->then($this->expectCallableOnceWith(array()));
+    }
+
+    public function testParallelWithoutTasksFromEmptyGeneratorResolvesWithEmptyArray()
+    {
+        $tasks = (function () {
+            if (false) {
+                yield;
+            }
+        })();
+
+        $promise = React\Async\parallel($tasks);
+
+        $promise->then($this->expectCallableOnceWith([]));
     }
 
     public function testParallelWithTasks()
@@ -35,6 +49,38 @@ class ParallelTest extends TestCase
                 });
             },
         );
+
+        $promise = React\Async\parallel($tasks);
+
+        $promise->then($this->expectCallableOnceWith(array('foo', 'bar')));
+
+        $timer = new Timer($this);
+        $timer->start();
+
+        Loop::run();
+
+        $timer->stop();
+        $timer->assertInRange(0.1, 0.2);
+    }
+
+    public function testParallelWithTasksFromGeneratorResolvesWithArrayOfFulfillmentValues()
+    {
+        $tasks = (function () {
+            yield function () {
+                return new Promise(function ($resolve) {
+                    Loop::addTimer(0.1, function () use ($resolve) {
+                        $resolve('foo');
+                    });
+                });
+            };
+            yield function () {
+                return new Promise(function ($resolve) {
+                    Loop::addTimer(0.11, function () use ($resolve) {
+                        $resolve('bar');
+                    });
+                });
+            };
+        })();
 
         $promise = React\Async\parallel($tasks);
 
@@ -79,6 +125,25 @@ class ParallelTest extends TestCase
         $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('whoops')));
 
         $this->assertSame(2, $called);
+    }
+
+    public function testParallelWithErrorFromInfiniteGeneratorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks()
+    {
+        $called = 0;
+
+        $tasks = (function () use (&$called) {
+            while (true) {
+                yield function () use (&$called) {
+                    return reject(new \RuntimeException('Rejected ' . ++$called));
+                };
+            }
+        })();
+
+        $promise = React\Async\parallel($tasks);
+
+        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Rejected 1')));
+
+        $this->assertSame(1, $called);
     }
 
     public function testParallelWithErrorWillCancelPendingPromises()
