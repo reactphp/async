@@ -208,7 +208,7 @@ $promise->then(function (int $bytes) {
 
 ### parallel()
 
-The `parallel(array<callable():PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<array<mixed>,Exception>` function can be used
+The `parallel(iterable<callable():PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<array<mixed>,Exception>` function can be used
 like this:
 
 ```php
@@ -250,7 +250,7 @@ React\Async\parallel([
 
 ### series()
 
-The `series(array<callable():PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<array<mixed>,Exception>` function can be used
+The `series(iterable<callable():PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<array<mixed>,Exception>` function can be used
 like this:
 
 ```php
@@ -292,7 +292,7 @@ React\Async\series([
 
 ### waterfall()
 
-The `waterfall(array<callable(mixed=):PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<mixed,Exception>` function can be used
+The `waterfall(iterable<callable(mixed=):PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<mixed,Exception>` function can be used
 like this:
 
 ```php
