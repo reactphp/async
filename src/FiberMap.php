@@ -9,47 +9,54 @@ use React\Promise\PromiseInterface;
  */
 final class FiberMap
 {
-    private static array $status = [];
-    private static array $map   = [];
+    private static ?\WeakMap $status = null;
+    private static ?\WeakMap $map = null;
 
     public static function register(\Fiber $fiber): void
     {
-        self::$status[\spl_object_id($fiber)] = false;
-        self::$map[\spl_object_id($fiber)] = [];
+        if (self::$status === null) {
+            self::$status = new \WeakMap();
+        }
+        if (self::$map === null) {
+            self::$map = new \WeakMap();
+        }
+
+        self::$status[$fiber] = false;
+        self::$map[$fiber] = [];
     }
 
     public static function cancel(\Fiber $fiber): void
     {
-        self::$status[\spl_object_id($fiber)] = true;
+        self::$status[$fiber] = true;
     }
 
     public static function isCancelled(\Fiber $fiber): bool
     {
-        return self::$status[\spl_object_id($fiber)] ?? false;
+        return self::$status[$fiber] ?? false;
     }
 
     public static function setPromise(\Fiber $fiber, PromiseInterface $promise): void
     {
-        self::$map[\spl_object_id($fiber)] = $promise;
+        self::$map[$fiber] = $promise;
     }
 
-    public static function unsetPromise(\Fiber $fiber, PromiseInterface $promise): void
+    public static function unsetPromise(\Fiber $fiber): void
     {
-        unset(self::$map[\spl_object_id($fiber)]);
+        unset(self::$map[$fiber]);
     }
 
     public static function has(\Fiber $fiber): bool
     {
-        return array_key_exists(\spl_object_id($fiber), self::$map);
+        return array_key_exists($fiber, self::$map);
     }
 
     public static function getPromise(\Fiber $fiber): ?PromiseInterface
     {
-        return self::$map[\spl_object_id($fiber)] ?? null;
+        return self::$map[$fiber] ?? null;
     }
 
     public static function unregister(\Fiber $fiber): void
     {
-        unset(self::$status[\spl_object_id($fiber)], self::$map[\spl_object_id($fiber)]);
+        unset(self::$status[$fiber], self::$map[$fiber]);
     }
 }
