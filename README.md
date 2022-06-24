@@ -521,7 +521,7 @@ Once released, this project will follow [SemVer](https://semver.org/).
 At the moment, this will install the latest development version:
 
 ```bash
-$ composer require react/async:^4@dev
+composer require react/async:^4@dev
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
@@ -539,7 +539,7 @@ You may target multiple versions at the same time to support a wider range of
 PHP versions like this:
 
 ```bash
-$ composer require "react/async:^4@dev || ^3@dev || ^2@dev"
+composer require "react/async:^4@dev || ^3@dev || ^2@dev"
 ```
 
 ## Tests
@@ -548,13 +548,13 @@ To run the test suite, you first need to clone this repo and then install all
 dependencies [through Composer](https://getcomposer.org/):
 
 ```bash
-$ composer install
+composer install
 ```
 
 To run the test suite, go to the project root and run:
 
 ```bash
-$ php vendor/bin/phpunit
+vendor/bin/phpunit
 ```
 
 ## License
