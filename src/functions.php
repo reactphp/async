@@ -2,8 +2,6 @@
 
 namespace React\Async;
 
-use React\EventLoop\Loop;
-use React\Promise\CancellablePromiseInterface;
 use React\Promise\Deferred;
 use React\Promise\Promise;
 use React\Promise\PromiseInterface;
@@ -199,7 +197,7 @@ function async(callable $function): callable
         }, function () use (&$fiber): void {
             FiberMap::cancel($fiber);
             $promise = FiberMap::getPromise($fiber);
-            if ($promise instanceof CancellablePromiseInterface) {
+            if ($promise instanceof PromiseInterface && \method_exists($promise, 'cancel')) {
                 $promise->cancel();
             }
         });
@@ -535,7 +533,7 @@ function parallel(iterable $tasks): PromiseInterface
     $pending = [];
     $deferred = new Deferred(function () use (&$pending) {
         foreach ($pending as $promise) {
-            if ($promise instanceof CancellablePromiseInterface) {
+            if ($promise instanceof PromiseInterface && \method_exists($promise, 'cancel')) {
                 $promise->cancel();
             }
         }
@@ -549,7 +547,7 @@ function parallel(iterable $tasks): PromiseInterface
         $deferred->reject($error);
 
         foreach ($pending as $promise) {
-            if ($promise instanceof CancellablePromiseInterface) {
+            if ($promise instanceof PromiseInterface && \method_exists($promise, 'cancel')) {
                 $promise->cancel();
             }
         }
@@ -593,7 +591,7 @@ function series(iterable $tasks): PromiseInterface
 {
     $pending = null;
     $deferred = new Deferred(function () use (&$pending) {
-        if ($pending instanceof CancellablePromiseInterface) {
+        if ($pending instanceof PromiseInterface && \method_exists($pending, 'cancel')) {
             $pending->cancel();
         }
         $pending = null;
@@ -644,7 +642,7 @@ function waterfall(iterable $tasks): PromiseInterface
 {
     $pending = null;
     $deferred = new Deferred(function () use (&$pending) {
-        if ($pending instanceof CancellablePromiseInterface) {
+        if ($pending instanceof PromiseInterface && \method_exists($pending, 'cancel')) {
             $pending->cancel();
         }
         $pending = null;

@@ -188,7 +188,7 @@ class WaterfallTest extends TestCase
         $tasks = array(
             function () {
                 return new Promise(function ($resolve) {
-                    $resolve();
+                    $resolve(null);
                 });
             },
             function () use (&$cancelled) {
