@@ -11,7 +11,6 @@ use function React\Async\await;
 use function React\Promise\all;
 use function React\Promise\reject;
 use function React\Promise\resolve;
-use function React\Promise\Timer\sleep;
 
 class AsyncTest extends TestCase
 {
@@ -187,49 +186,60 @@ class AsyncTest extends TestCase
         $this->assertLessThan(0.12, $time);
     }
 
-    public function testCancel()
+    public function testCancelAsyncWillReturnRejectedPromiseWhenCancellingPendingPromiseRejects()
     {
-        self::expectOutputString('a');
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Timer cancelled');
-
-        $promise = async(static function (): int {
-            echo 'a';
-            await(sleep(2));
-            echo 'b';
-
-            return time();
+        $promise = async(function () {
+            await(new Promise(function () { }, function () {
+                throw new \RuntimeException('Operation cancelled');
+            }));
         })();
 
         $promise->cancel();
-        await($promise);
+
+        $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Operation cancelled')));
     }
 
-    public function testCancelTryCatch()
+    public function testCancelAsyncWillReturnFulfilledPromiseWhenCancellingPendingPromiseRejectsInsideCatchThatReturnsValue()
     {
-        self::expectOutputString('ab');
-
-        $promise = async(static function (): int {
-            echo 'a';
+        $promise = async(function () {
             try {
-                await(sleep(2));
-            } catch (\Throwable) {
-                // No-Op
+                await(new Promise(function () { }, function () {
+                    throw new \RuntimeException('Operation cancelled');
+                }));
+            } catch (\RuntimeException $e) {
+                return 42;
             }
-            echo 'b';
-
-            return time();
         })();
 
         $promise->cancel();
-        await($promise);
+
+        $promise->then($this->expectCallableOnceWith(42));
     }
 
-    public function testNestedCancel()
+    public function testCancelAsycWillReturnPendigPromiseWhenCancellingFirstPromiseRejectsInsideCatchThatAwaitsSecondPromise()
+    {
+        $promise = async(function () {
+            try {
+                await(new Promise(function () { }, function () {
+                    throw new \RuntimeException('First operation cancelled');
+                }));
+            } catch (\RuntimeException $e) {
+                await(new Promise(function () { }, function () {
+                    throw new \RuntimeException('Second operation never cancelled');
+                }));
+            }
+        })();
+
+        $promise->cancel();
+
+        $promise->then($this->expectCallableNever(), $this->expectCallableNever());
+    }
+
+    public function testCancelAsyncWillCancelNestedAwait()
     {
         self::expectOutputString('abc');
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Timer cancelled');
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Operation cancelled');
 
         $promise = async(static function (): int {
             echo 'a';
@@ -237,7 +247,9 @@ class AsyncTest extends TestCase
                 echo 'b';
                 await(async(static function(): void {
                     echo 'c';
-                    await(sleep(2));
+                    await(new Promise(function () { }, function () {
+                        throw new \RuntimeException('Operation cancelled');
+                    }));
                     echo 'd';
                 })());
                 echo 'e';
@@ -249,45 +261,5 @@ class AsyncTest extends TestCase
 
         $promise->cancel();
         await($promise);
-    }
-
-    public function testCancelFiberThatCatchesExceptions()
-    {
-        self::expectOutputString('ab');
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Timer cancelled');
-
-        $promise = async(static function (): int {
-            echo 'a';
-            try {
-                await(sleep(2));
-            } catch (\Throwable) {
-                // No-Op
-            }
-            echo 'b';
-            await(sleep(0.1));
-            echo 'c';
-
-            return time();
-        })();
-
-        $promise->cancel();
-        await($promise);
-    }
-
-    public function testNotAwaitedPromiseWillNotBeCanceled()
-    {
-        self::expectOutputString('acb');
-
-        async(static function (): int {
-            echo 'a';
-            sleep(0.001)->then(static function (): void {
-                echo 'b';
-            });
-            echo 'c';
-
-            return time();
-        })()->cancel();
-        Loop::run();
     }
 }
