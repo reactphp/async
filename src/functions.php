@@ -19,13 +19,15 @@ use function React\Promise\resolve;
  * asynchronously without blocking:
  *
  * ```php
- * Loop::addTimer(0.5, React\Async\async(function() {
+ * Loop::addTimer(0.5, React\Async\async(function () {
  *     echo 'a';
- *     React\async\await(React\Promise\Timer\sleep(1.0));
+ *     React\Async\await(React\Promise\Timer\sleep(1.0));
  *     echo 'c';
  * }));
  *
- * Loop::addTimer(1.0, fn() => echo 'b');
+ * Loop::addTimer(1.0, function () {
+ *     echo 'b';
+ * });
  *
  * // prints "a" at t=0.5s
  * // prints "b" at t=1.0s
@@ -39,13 +41,15 @@ use function React\Promise\resolve;
  * non-blocking:
  *
  * ```php
- * Loop::addTimer(0.5, React\Async\async(function() {
+ * Loop::addTimer(0.5, React\Async\async(function () {
  *     echo 'a';
  *     sleep(1); // broken: using PHP's blocking sleep() for demonstration purposes
  *     echo 'c';
  * }));
  *
- * Loop::addTimer(1.0, fn() => echo 'b');
+ * Loop::addTimer(1.0, function () {
+ *     echo 'b';
+ * });
  *
  * // prints "a" at t=0.5s
  * // prints "c" at t=1.5s: Correct timing, but wrong order
@@ -157,7 +161,7 @@ use function React\Promise\resolve;
  * ```php
  * $promise = async(static function (): int {
  *     echo 'a';
- *     await(async(static function(): void {
+ *     await(async(static function (): void {
  *         echo 'b';
  *         await(React\Promise\Timer\sleep(2));
  *         echo 'c';
@@ -227,13 +231,15 @@ function async(callable $function): callable
  * outside this function can be executed asynchronously without blocking:
  *
  * ```php
- * Loop::addTimer(0.5, React\Async\async(function() {
+ * Loop::addTimer(0.5, React\Async\async(function () {
  *     echo 'a';
- *     React\async\await(React\Promise\Timer\sleep(1.0));
+ *     React\Async\await(React\Promise\Timer\sleep(1.0));
  *     echo 'c';
  * }));
  *
- * Loop::addTimer(1.0, fn() => echo 'b');
+ * Loop::addTimer(1.0, function () {
+ *     echo 'b';
+ * });
  *
  * // prints "a" at t=0.5s
  * // prints "b" at t=1.0s

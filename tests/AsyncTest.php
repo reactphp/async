@@ -243,9 +243,9 @@ class AsyncTest extends TestCase
 
         $promise = async(static function (): int {
             echo 'a';
-            await(async(static function(): void {
+            await(async(static function (): void {
                 echo 'b';
-                await(async(static function(): void {
+                await(async(static function (): void {
                     echo 'c';
                     await(new Promise(function () { }, function () {
                         throw new \RuntimeException('Operation cancelled');
