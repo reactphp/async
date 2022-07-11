@@ -3,7 +3,7 @@
 [![CI status](https://github.com/reactphp/async/workflows/CI/badge.svg)](https://github.com/reactphp/async/actions)
 [![installs on Packagist](https://img.shields.io/packagist/dt/react/async?color=blue&label=installs%20on%20Packagist)](https://packagist.org/packages/react/async)
 
-Async utilities for [ReactPHP](https://reactphp.org/).
+Async utilities and fibers for [ReactPHP](https://reactphp.org/).
 
 This library allows you to manage async control flow. It provides a number of
 combinators for [Promise](https://github.com/reactphp/promise)-based APIs.
@@ -13,16 +13,6 @@ React/Async will not automagically change blocking code to be async. You need
 to have an actual event loop and non-blocking libraries interacting with that
 event loop for it to work. As long as you have a Promise-based API that runs in
 an event loop, it can be used with this library.
-
-> **Development version:** This branch contains the code for the upcoming 4.0
-> release which will be the way forward for this package. However, we will still
-> actively support 3.0 and 2.0 for those not yet on PHP 8.1+.
->
-> If you're using an older PHP version, you may use the
-> [`3.x` branch](https://github.com/reactphp/async/tree/3.x) (PHP 7.1+) or
-> [`2.x` branch](https://github.com/reactphp/async/tree/2.x) (PHP 5.3+) which both
-> provide a compatible API but do not take advantage of newer language features.
-> See also [installation instructions](#install) for more details.
 
 **Table of Contents**
 
@@ -525,11 +515,11 @@ React\Async\waterfall([
 The recommended way to install this library is [through Composer](https://getcomposer.org/).
 [New to Composer?](https://getcomposer.org/doc/00-intro.md)
 
-Once released, this project will follow [SemVer](https://semver.org/).
-At the moment, this will install the latest development version:
+This project follows [SemVer](https://semver.org/).
+This will install the latest supported version from this branch:
 
 ```bash
-composer require react/async:^4@dev
+composer require react/async:^4
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
@@ -547,7 +537,7 @@ You may target multiple versions at the same time to support a wider range of
 PHP versions like this:
 
 ```bash
-composer require "react/async:^4@dev || ^3@dev || ^2@dev"
+composer require "react/async:^4 || ^3 || ^2"
 ```
 
 ## Tests

@@ -1,6 +1,6 @@
 {
     "name": "react/async",
-    "description": "Async utilities for ReactPHP",
+    "description": "Async utilities and fibers for ReactPHP",
     "keywords": ["async", "ReactPHP"],
     "license": "MIT",
     "authors": [
