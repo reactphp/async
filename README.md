@@ -329,11 +329,11 @@ React\Async\waterfall([
 The recommended way to install this library is [through Composer](https://getcomposer.org/).
 [New to Composer?](https://getcomposer.org/doc/00-intro.md)
 
-Once released, this project will follow [SemVer](https://semver.org/).
-At the moment, this will install the latest development version:
+This project follows [SemVer](https://semver.org/).
+This will install the latest supported version from this branch:
 
 ```bash
-composer require react/async:dev-main
+composer require react/async:^3
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
@@ -341,12 +341,6 @@ See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
 This project aims to run on any platform and thus does not require any PHP
 extensions and supports running on PHP 7.1 through current PHP 8+.
 It's *highly recommended to use the latest supported PHP version* for this project.
-
-We're committed to providing long-term support (LTS) options and to provide a
-smooth upgrade path. If you're using an older PHP version, you may use the
-[`2.x` branch](https://github.com/reactphp/async/tree/2.x) which provides a
-compatible API but does not take advantage of newer language features. You may
-target both versions at the same time to support a wider range of PHP versions.
 
 ## Tests
 
