@@ -213,11 +213,11 @@ React\Async\waterfall([
 The recommended way to install this library is [through Composer](https://getcomposer.org/).
 [New to Composer?](https://getcomposer.org/doc/00-intro.md)
 
-Once released, this project will follow [SemVer](https://semver.org/).
-At the moment, this will install the latest development version:
+This project follows [SemVer](https://semver.org/).
+This will install the latest supported version from this branch:
 
 ```bash
-composer require react/async:dev-main
+composer require react/async:^2
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
