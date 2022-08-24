@@ -9,18 +9,11 @@ use React\Promise\PromiseInterface;
  */
 final class FiberMap
 {
-    private static array $status = [];
-    private static array $map   = [];
+    private static array $map = [];
 
     public static function register(\Fiber $fiber): void
     {
-        self::$status[\spl_object_id($fiber)] = false;
         self::$map[\spl_object_id($fiber)] = [];
-    }
-
-    public static function cancel(\Fiber $fiber): void
-    {
-        self::$status[\spl_object_id($fiber)] = true;
     }
 
     public static function setPromise(\Fiber $fiber, PromiseInterface $promise): void
@@ -40,6 +33,6 @@ final class FiberMap
 
     public static function unregister(\Fiber $fiber): void
     {
-        unset(self::$status[\spl_object_id($fiber)], self::$map[\spl_object_id($fiber)]);
+        unset(self::$map[\spl_object_id($fiber)]);
     }
 }
