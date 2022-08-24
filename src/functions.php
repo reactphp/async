@@ -199,7 +199,6 @@ function async(callable $function): callable
 
             $fiber->start();
         }, function () use (&$fiber): void {
-            FiberMap::cancel($fiber);
             $promise = FiberMap::getPromise($fiber);
             if ($promise instanceof PromiseInterface && \method_exists($promise, 'cancel')) {
                 $promise->cancel();
