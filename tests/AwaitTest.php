@@ -13,6 +13,30 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
+    public function testExecutionOrder(callable $await)
+    {
+        self::expectOutputString('acbd');
+
+        $deferred = new React\Promise\Deferred();
+
+        $promises[] = React\Async\async(function () use ($deferred, $await) {
+            print 'a';
+            $await($deferred->promise());
+            print 'b';
+        })();
+
+        $promises[] = React\Async\async(function () use ($deferred) {
+            print 'c';
+            $deferred->resolve();
+            print 'd';
+        })();
+
+        $await(React\Promise\all($promises));
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
     public function testAwaitThrowsExceptionWhenPromiseIsRejectedWithException(callable $await)
     {
         $promise = new Promise(function () {
