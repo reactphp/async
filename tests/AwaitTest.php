@@ -7,6 +7,7 @@ use React\EventLoop\Loop;
 use React\Promise\Deferred;
 use React\Promise\Promise;
 use function React\Async\async;
+use function React\Promise\all;
 
 class AwaitTest extends TestCase
 {
@@ -17,21 +18,21 @@ class AwaitTest extends TestCase
     {
         self::expectOutputString('abcd');
 
-        $deferred = new React\Promise\Deferred();
+        $deferred = new Deferred();
 
-        $promises[] = React\Async\async(function () use ($deferred, $await) {
+        $promises[] = async(function () use ($deferred, $await) {
             print 'a';
             $await($deferred->promise());
             print 'c';
         })();
 
-        $promises[] = React\Async\async(function () use ($deferred) {
+        $promises[] = async(function () use ($deferred) {
             print 'b';
             $deferred->resolve();
             print 'd';
         })();
 
-        $await(React\Promise\all($promises));
+        $await(all($promises));
     }
 
     /**
