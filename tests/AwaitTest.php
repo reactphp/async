@@ -15,18 +15,18 @@ class AwaitTest extends TestCase
      */
     public function testExecutionOrder(callable $await)
     {
-        self::expectOutputString('acbd');
+        self::expectOutputString('abcd');
 
         $deferred = new React\Promise\Deferred();
 
         $promises[] = React\Async\async(function () use ($deferred, $await) {
             print 'a';
             $await($deferred->promise());
-            print 'b';
+            print 'c';
         })();
 
         $promises[] = React\Async\async(function () use ($deferred) {
-            print 'c';
+            print 'b';
             $deferred->resolve();
             print 'd';
         })();
