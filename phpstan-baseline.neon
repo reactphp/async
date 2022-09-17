@@ -1,0 +1,816 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Method React\\\\Async\\\\FiberMap\\:\\:cancel\\(\\) has parameter \\$fiber with generic class Fiber but does not specify its types\\: TStart, TResume, TReturn, TSuspend$#"
+			count: 1
+			path: src/FiberMap.php
+
+		-
+			message: "#^Method React\\\\Async\\\\FiberMap\\:\\:getPromise\\(\\) has parameter \\$fiber with generic class Fiber but does not specify its types\\: TStart, TResume, TReturn, TSuspend$#"
+			count: 1
+			path: src/FiberMap.php
+
+		-
+			message: "#^Method React\\\\Async\\\\FiberMap\\:\\:register\\(\\) has parameter \\$fiber with generic class Fiber but does not specify its types\\: TStart, TResume, TReturn, TSuspend$#"
+			count: 1
+			path: src/FiberMap.php
+
+		-
+			message: "#^Method React\\\\Async\\\\FiberMap\\:\\:setPromise\\(\\) has parameter \\$fiber with generic class Fiber but does not specify its types\\: TStart, TResume, TReturn, TSuspend$#"
+			count: 1
+			path: src/FiberMap.php
+
+		-
+			message: "#^Method React\\\\Async\\\\FiberMap\\:\\:unregister\\(\\) has parameter \\$fiber with generic class Fiber but does not specify its types\\: TStart, TResume, TReturn, TSuspend$#"
+			count: 1
+			path: src/FiberMap.php
+
+		-
+			message: "#^Method React\\\\Async\\\\FiberMap\\:\\:unsetPromise\\(\\) has parameter \\$fiber with generic class Fiber but does not specify its types\\: TStart, TResume, TReturn, TSuspend$#"
+			count: 1
+			path: src/FiberMap.php
+
+		-
+			message: "#^Property React\\\\Async\\\\FiberMap\\:\\:\\$map type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/FiberMap.php
+
+		-
+			message: "#^Property React\\\\Async\\\\FiberMap\\:\\:\\$status type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/FiberMap.php
+
+		-
+			message: "#^Cannot call method isSuspended\\(\\) on Fiber\\|null\\.$#"
+			count: 1
+			path: src/SimpleFiber.php
+
+		-
+			message: "#^Cannot call method resume\\(\\) on Fiber\\|null\\.$#"
+			count: 1
+			path: src/SimpleFiber.php
+
+		-
+			message: "#^Property React\\\\Async\\\\SimpleFiber\\:\\:\\$fiber with generic class Fiber does not specify its types\\: TStart, TResume, TReturn, TSuspend$#"
+			count: 1
+			path: src/SimpleFiber.php
+
+		-
+			message: "#^Property React\\\\Async\\\\SimpleFiber\\:\\:\\$scheduler with generic class Fiber does not specify its types\\: TStart, TResume, TReturn, TSuspend$#"
+			count: 1
+			path: src/SimpleFiber.php
+
+		-
+			message: "#^Trying to invoke mixed but it's not a callable\\.$#"
+			count: 1
+			path: src/SimpleFiber.php
+
+		-
+			message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
+			count: 2
+			path: src/functions.php
+
+		-
+			message: "#^Cannot access offset 'args' on mixed\\.$#"
+			count: 2
+			path: src/functions.php
+
+		-
+			message: "#^Cannot access offset mixed on mixed\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Empty array passed to foreach\\.$#"
+			count: 2
+			path: src/functions.php
+
+		-
+			message: "#^Function React\\\\Async\\\\parallel\\(\\) has invalid return type React\\\\Async\\\\Exception\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Function React\\\\Async\\\\series\\(\\) has invalid return type React\\\\Async\\\\Exception\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Function React\\\\Async\\\\waterfall\\(\\) has invalid return type React\\\\Async\\\\Exception\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Instanceof between \\*NEVER\\* and React\\\\Promise\\\\PromiseInterface will always evaluate to false\\.$#"
+			count: 2
+			path: src/functions.php
+
+		-
+			message: "#^Instanceof between null and React\\\\Promise\\\\PromiseInterface will always evaluate to false\\.$#"
+			count: 3
+			path: src/functions.php
+
+		-
+			message: "#^Invalid type Throwable\\|null to throw\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$tasks contains generic type React\\\\Promise\\\\PromiseInterface\\<mixed, React\\\\Async\\\\Exception\\> but interface React\\\\Promise\\\\PromiseInterface is not generic\\.$#"
+			count: 3
+			path: src/functions.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(callable\\(\\.\\.\\.\\$args\\)\\:\\\\Generator\\<mixed,PromiseInterface,mixed,mixed\\> \\$function\\)\\: Unexpected token \"\\(\", expected variable at offset 4013$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^PHPDoc tag @return contains generic type React\\\\Promise\\\\PromiseInterface\\<array, React\\\\Async\\\\Exception\\> but interface React\\\\Promise\\\\PromiseInterface is not generic\\.$#"
+			count: 2
+			path: src/functions.php
+
+		-
+			message: "#^PHPDoc tag @return contains generic type React\\\\Promise\\\\PromiseInterface\\<mixed, React\\\\Async\\\\Exception\\> but interface React\\\\Promise\\\\PromiseInterface is not generic\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^PHPDoc tag @return contains generic type React\\\\Promise\\\\PromiseInterface\\<mixed\\> but interface React\\\\Promise\\\\PromiseInterface is not generic\\.$#"
+			count: 2
+			path: src/functions.php
+
+		-
+			message: "#^Parameter \\#1 \\$array of function array_shift expects array, iterable\\<callable\\> given\\.$#"
+			count: 2
+			path: src/functions.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of function call_user_func expects callable\\(\\)\\: mixed, mixed given\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of function call_user_func_array expects callable\\(\\)\\: mixed, mixed given\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Parameter \\#1 \\$fiber of static method React\\\\Async\\\\FiberMap\\:\\:cancel\\(\\) expects Fiber, Fiber\\<mixed, mixed, mixed, mixed\\>\\|null given\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Parameter \\#1 \\$fiber of static method React\\\\Async\\\\FiberMap\\:\\:getPromise\\(\\) expects Fiber, Fiber\\<mixed, mixed, mixed, mixed\\>\\|null given\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Parameter \\#1 \\$fiber of static method React\\\\Async\\\\FiberMap\\:\\:unregister\\(\\) expects Fiber, Fiber\\<mixed, mixed, mixed, mixed\\>\\|null given\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Parameter \\$tasks of function React\\\\Async\\\\parallel\\(\\) has invalid type React\\\\Async\\\\Exception\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Parameter \\$tasks of function React\\\\Async\\\\series\\(\\) has invalid type React\\\\Async\\\\Exception\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Parameter \\$tasks of function React\\\\Async\\\\waterfall\\(\\) has invalid type React\\\\Async\\\\Exception\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Result of && is always false\\.$#"
+			count: 5
+			path: src/functions.php
+
+		-
+			message: "#^Trying to invoke \\(Closure\\(\\)\\: void\\)\\|null but it might not be a callable\\.$#"
+			count: 2
+			path: src/functions.php
+
+		-
+			message: "#^Trying to invoke null but it's not a callable\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 2
+			path: src/functions.php
+
+		-
+			message: "#^Variable \\$next in PHPDoc tag @var does not match assigned variable \\$taskCallback\\.$#"
+			count: 1
+			path: src/functions.php
+
+		-
+			message: "#^Anonymous function should return int but returns mixed\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Call to an undefined method React\\\\Promise\\\\PromiseInterface\\<mixed\\>\\:\\:cancel\\(\\)\\.$#"
+			count: 4
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Callable callable\\(\\)\\: React\\\\Promise\\\\PromiseInterface\\<mixed\\> invoked with 1 parameter, 0 required\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testAsyncReturnsPendingPromiseWhenCallbackReturnsPendingPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsAfterAwaitingPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsAfterAwaitingTwoConcurrentPromises\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsPromiseThatFulfillsWithValue\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsValue\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testAsyncReturnsPromiseThatRejectsWithExceptionWhenCallbackReturnsPromiseThatRejectsWithException\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testAsyncReturnsPromiseThatRejectsWithExceptionWhenCallbackThrows\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testAsyncReturnsPromiseThatRejectsWithExceptionWhenCallbackThrowsAfterAwaitingPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testAsyncWithAwaitReturnsPromiseRejectedWithExceptionImmediatelyWhenPromiseIsRejected\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testAsyncWithAwaitReturnsReturnsPromiseFulfilledWithValueImmediatelyWhenPromiseIsFulfilled\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testCancelAsycWillReturnPendigPromiseWhenCancellingFirstPromiseRejectsInsideCatchThatAwaitsSecondPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testCancelAsyncWillCancelNestedAwait\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testCancelAsyncWillReturnFulfilledPromiseWhenCancellingPendingPromiseRejectsInsideCatchThatReturnsValue\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AsyncTest\\:\\:testCancelAsyncWillReturnRejectedPromiseWhenCancellingPendingPromiseRejects\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$function of function React\\\\Async\\\\async expects callable\\(\\.\\.\\.mixed\\)\\: mixed, Closure\\(int\\)\\: int given\\.$#"
+			count: 1
+			path: tests/AsyncTest.php
+
+		-
+			message: "#^Anonymous function has an unused use \\$await\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:provideAwaiters\\(\\) return type has no value type specified in iterable type iterable\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAlreadyFulfilledPromiseShouldNotSuspendFiber\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitAsyncReturnsValueImmediatelyWhenPromiseIsFulfilled\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitAsyncThrowsExceptionImmediatelyWhenPromiseIsRejected\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitReturnsValueImmediatelyInCustomFiberWhenPromiseIsFulfilled\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitReturnsValueImmediatelyWhenPromiseIsFulfilled\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitReturnsValueImmediatelyWithoutRunningLoop\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitReturnsValueWhenPromiseIsFullfilled\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithNullValue\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitShouldNotCreateAnyGarbageReferencesForRejectedPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitShouldNotCreateAnyGarbageReferencesForResolvedPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitThrowsErrorWhenPromiseIsRejectedWithError\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitThrowsExceptionImmediatelyInCustomFiberWhenPromiseIsRejected\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitThrowsExceptionImmediatelyWhenPromiseIsRejected\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitThrowsExceptionWhenPromiseIsRejectedWithException\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitThrowsExceptionWithoutRunningLoop\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithFalse\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithNull\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testNestedAwaits\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testRejectedPromisesShouldBeDetached\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\AwaitTest\\:\\:testResolvedPromisesShouldBeDetached\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$fiber of static method React\\\\Async\\\\FiberMap\\:\\:getPromise\\(\\) expects Fiber, Fiber\\|null given\\.$#"
+			count: 2
+			path: tests/AwaitTest.php
+
+		-
+			message: "#^Call to an undefined method React\\\\Promise\\\\PromiseInterface\\<mixed\\>\\:\\:cancel\\(\\)\\.$#"
+			count: 4
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^If condition is always false\\.$#"
+			count: 3
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCancelCoroutineWillReturnFulfilledPromiseWhenCancellingPendingPromiseRejectsInsideCatchThatReturnsValue\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCancelCoroutineWillReturnPendigPromiseWhenCancellingFirstPromiseRejectsInsideCatchThatYieldsSecondPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCancelCoroutineWillReturnRejectedPromiseWhenCancellingPendingPromiseRejects\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineReturnsFulfilledPromiseIfFunctionReturnsAfterYieldingPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineReturnsFulfilledPromiseIfFunctionReturnsAfterYieldingRejectedPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineReturnsFulfilledPromiseIfFunctionReturnsImmediately\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineReturnsFulfilledPromiseIfFunctionReturnsWithoutGenerator\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineReturnsRejectedPromiseIfFunctionThrowsAfterYieldingPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineReturnsRejectedPromiseIfFunctionThrowsAfterYieldingRejectedPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineReturnsRejectedPromiseIfFunctionThrowsImmediately\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineReturnsRejectedPromiseIfFunctionThrowsWithoutGenerator\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineReturnsRejectedPromiseIfFunctionYieldsInvalidValue\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithExceptionImmediately\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithExceptionOnCancellation\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineShouldNotCreateAnyGarbageReferencesWhenGeneratorReturns\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineShouldNotCreateAnyGarbageReferencesWhenGeneratorThrowsBeforeFirstYield\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\CoroutineTest\\:\\:testCoroutineShouldNotCreateAnyGarbageReferencesWhenGeneratorYieldsInvalidValue\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: tests/CoroutineTest.php
+
+		-
+			message: "#^Call to an undefined method React\\\\Promise\\\\PromiseInterface\\<array, React\\\\Async\\\\Exception\\>\\:\\:cancel\\(\\)\\.$#"
+			count: 1
+			path: tests/ParallelTest.php
+
+		-
+			message: "#^If condition is always false\\.$#"
+			count: 1
+			path: tests/ParallelTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\ParallelTest\\:\\:testParallelWillCancelPendingPromisesWhenCallingCancelOnResultingPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/ParallelTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\ParallelTest\\:\\:testParallelWithDelayedErrorReturnsPromiseRejectedWithExceptionFromTask\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/ParallelTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\ParallelTest\\:\\:testParallelWithErrorFromInfiniteGeneratorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/ParallelTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\ParallelTest\\:\\:testParallelWithErrorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/ParallelTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\ParallelTest\\:\\:testParallelWithErrorWillCancelPendingPromises\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/ParallelTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\ParallelTest\\:\\:testParallelWithTasks\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/ParallelTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\ParallelTest\\:\\:testParallelWithTasksFromGeneratorResolvesWithArrayOfFulfillmentValues\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/ParallelTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\ParallelTest\\:\\:testParallelWithoutTasks\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/ParallelTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\ParallelTest\\:\\:testParallelWithoutTasksFromEmptyGeneratorResolvesWithEmptyArray\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/ParallelTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$tasks of function React\\\\Async\\\\parallel expects iterable\\<callable\\(\\)\\: React\\\\Promise\\\\PromiseInterface\\<mixed, React\\\\Async\\\\Exception\\>\\>, Generator\\<int, null, mixed, void\\> given\\.$#"
+			count: 1
+			path: tests/ParallelTest.php
+
+		-
+			message: "#^While loop condition is always true\\.$#"
+			count: 1
+			path: tests/ParallelTest.php
+
+		-
+			message: "#^Call to an undefined method React\\\\Promise\\\\PromiseInterface\\<array, React\\\\Async\\\\Exception\\>\\:\\:cancel\\(\\)\\.$#"
+			count: 1
+			path: tests/SeriesTest.php
+
+		-
+			message: "#^If condition is always false\\.$#"
+			count: 1
+			path: tests/SeriesTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\SeriesTest\\:\\:testSeriesWillCancelFirstPendingPromiseWhenCallingCancelOnResultingPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/SeriesTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\SeriesTest\\:\\:testSeriesWithError\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/SeriesTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\SeriesTest\\:\\:testSeriesWithErrorFromInfiniteGeneratorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/SeriesTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\SeriesTest\\:\\:testSeriesWithErrorFromInfiniteIteratorAggregateReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/SeriesTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\SeriesTest\\:\\:testSeriesWithTasks\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/SeriesTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\SeriesTest\\:\\:testSeriesWithTasksFromGeneratorResolvesWithArrayOfFulfillmentValues\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/SeriesTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\SeriesTest\\:\\:testSeriesWithoutTasks\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/SeriesTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\SeriesTest\\:\\:testSeriesWithoutTasksFromEmptyGeneratorResolvesWithEmptyArray\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/SeriesTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$tasks of function React\\\\Async\\\\series expects iterable\\<callable\\(\\)\\: React\\\\Promise\\\\PromiseInterface\\<mixed, React\\\\Async\\\\Exception\\>\\>, Generator\\<int, null, mixed, void\\> given\\.$#"
+			count: 1
+			path: tests/SeriesTest.php
+
+		-
+			message: "#^Property class@anonymous/tests/SeriesTest\\.php\\:150\\:\\:\\$called has no type specified\\.$#"
+			count: 1
+			path: tests/SeriesTest.php
+
+		-
+			message: "#^While loop condition is always true\\.$#"
+			count: 2
+			path: tests/SeriesTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\TestCase\\:\\:createCallableMock\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/TestCase.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\TestCase\\:\\:expectCallableNever\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/TestCase.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\TestCase\\:\\:expectCallableOnce\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/TestCase.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\TestCase\\:\\:expectCallableOnceWith\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/TestCase.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\TestCase\\:\\:expectCallableOnceWith\\(\\) has parameter \\$value with no type specified\\.$#"
+			count: 1
+			path: tests/TestCase.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\Timer\\:\\:assertGreaterThan\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/Timer.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\Timer\\:\\:assertGreaterThan\\(\\) has parameter \\$milliseconds with no type specified\\.$#"
+			count: 1
+			path: tests/Timer.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\Timer\\:\\:assertInRange\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/Timer.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\Timer\\:\\:assertInRange\\(\\) has parameter \\$maxMs with no type specified\\.$#"
+			count: 1
+			path: tests/Timer.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\Timer\\:\\:assertInRange\\(\\) has parameter \\$minMs with no type specified\\.$#"
+			count: 1
+			path: tests/Timer.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\Timer\\:\\:assertLessThan\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/Timer.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\Timer\\:\\:assertLessThan\\(\\) has parameter \\$milliseconds with no type specified\\.$#"
+			count: 1
+			path: tests/Timer.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\Timer\\:\\:getInterval\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/Timer.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\Timer\\:\\:start\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/Timer.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\Timer\\:\\:stop\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/Timer.php
+
+		-
+			message: "#^Property React\\\\Tests\\\\Async\\\\Timer\\:\\:\\$start has no type specified\\.$#"
+			count: 1
+			path: tests/Timer.php
+
+		-
+			message: "#^Property React\\\\Tests\\\\Async\\\\Timer\\:\\:\\$stop has no type specified\\.$#"
+			count: 1
+			path: tests/Timer.php
+
+		-
+			message: "#^Property React\\\\Tests\\\\Async\\\\Timer\\:\\:\\$testCase has no type specified\\.$#"
+			count: 1
+			path: tests/Timer.php
+
+		-
+			message: "#^Call to an undefined method React\\\\Promise\\\\PromiseInterface\\<mixed, React\\\\Async\\\\Exception\\>\\:\\:cancel\\(\\)\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^If condition is always false\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\WaterfallTest\\:\\:testWaterfallWillCancelFirstPendingPromiseWhenCallingCancelOnResultingPromise\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\WaterfallTest\\:\\:testWaterfallWithError\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\WaterfallTest\\:\\:testWaterfallWithErrorFromInfiniteGeneratorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\WaterfallTest\\:\\:testWaterfallWithErrorFromInfiniteIteratorAggregateReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\WaterfallTest\\:\\:testWaterfallWithTasks\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\WaterfallTest\\:\\:testWaterfallWithTasksFromGeneratorResolvesWithFinalFulfillmentValue\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\WaterfallTest\\:\\:testWaterfallWithoutTasks\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^Method React\\\\Tests\\\\Async\\\\WaterfallTest\\:\\:testWaterfallWithoutTasksFromEmptyGeneratorResolvesWithNull\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$tasks of function React\\\\Async\\\\waterfall expects iterable\\<callable\\(mixed\\=\\)\\: React\\\\Promise\\\\PromiseInterface\\<mixed, React\\\\Async\\\\Exception\\>\\>, Generator\\<int, Closure\\(mixed\\)\\: React\\\\Promise\\\\Promise, mixed, void\\> given\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$tasks of function React\\\\Async\\\\waterfall expects iterable\\<callable\\(mixed\\=\\)\\: React\\\\Promise\\\\PromiseInterface\\<mixed, React\\\\Async\\\\Exception\\>\\>, Generator\\<int, null, mixed, void\\> given\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$tasks of function React\\\\Async\\\\waterfall expects iterable\\<callable\\(mixed\\=\\)\\: React\\\\Promise\\\\PromiseInterface\\<mixed, React\\\\Async\\\\Exception\\>\\>, array\\{Closure\\(\\)\\: React\\\\Promise\\\\Promise, Closure\\(mixed\\)\\: React\\\\Promise\\\\Promise, Closure\\(\\)\\: React\\\\Promise\\\\Promise\\} given\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$tasks of function React\\\\Async\\\\waterfall expects iterable\\<callable\\(mixed\\=\\)\\: React\\\\Promise\\\\PromiseInterface\\<mixed, React\\\\Async\\\\Exception\\>\\>, array\\{Closure\\(mixed\\=\\)\\: React\\\\Promise\\\\Promise, Closure\\(mixed\\)\\: React\\\\Promise\\\\Promise, Closure\\(mixed\\)\\: React\\\\Promise\\\\Promise\\} given\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^Property class@anonymous/tests/WaterfallTest\\.php\\:164\\:\\:\\$called has no type specified\\.$#"
+			count: 1
+			path: tests/WaterfallTest.php
+
+		-
+			message: "#^While loop condition is always true\\.$#"
+			count: 2
+			path: tests/WaterfallTest.php
