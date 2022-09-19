@@ -23,7 +23,7 @@ jobs:
       - run: vendor/bin/phpunit --coverage-text
 
   PHPStan:
-    name: PHPStan
+    name: PHPStan (PHP ${{ matrix.php }})
     runs-on: ubuntu-20.04
     strategy:
       matrix:
