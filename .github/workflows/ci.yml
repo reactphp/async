@@ -37,7 +37,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
-          tools: phpstan
+          tools: phpstan:1.8.8
       - name: Install Composer dependencies
         run: composer install
       - name: Run static analysis
