@@ -194,6 +194,7 @@ class AsyncTest extends TestCase
             }));
         })();
 
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
 
         $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Operation cancelled')));
@@ -211,6 +212,7 @@ class AsyncTest extends TestCase
             }
         })();
 
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
 
         $promise->then($this->expectCallableOnceWith(42));
@@ -230,6 +232,7 @@ class AsyncTest extends TestCase
             }
         })();
 
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
 
         $promise->then($this->expectCallableNever(), $this->expectCallableNever());
@@ -259,6 +262,7 @@ class AsyncTest extends TestCase
             return time();
         })();
 
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
         await($promise);
     }

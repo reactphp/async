@@ -361,7 +361,7 @@ class AwaitTest extends TestCase
             $resolve($await(new Promise(function ($resolve) use ($await) {
                 $resolve($await(new Promise(function ($resolve) use ($await) {
                     $resolve($await(new Promise(function ($resolve) use ($await) {
-                        $resolve($await(new Promise(function ($resolve) use ($await) {
+                        $resolve($await(new Promise(function ($resolve) {
                             Loop::addTimer(0.01, function () use ($resolve) {
                                 $resolve(true);
                             });

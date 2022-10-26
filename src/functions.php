@@ -177,7 +177,7 @@ use function React\Promise\resolve;
  * ```
  *
  * @param callable(mixed ...$args):mixed $function
- * @return callable(): PromiseInterface<mixed>
+ * @return callable(mixed ...$args): PromiseInterface<mixed>
  * @since 4.0.0
  * @see coroutine()
  */
@@ -587,7 +587,7 @@ function delay(float $seconds): void
  * });
  * ```
  *
- * @param callable(...$args):\Generator<mixed,PromiseInterface,mixed,mixed> $function
+ * @param callable(mixed ...$args):\Generator<mixed,PromiseInterface,mixed,mixed> $function
  * @param mixed ...$args Optional list of additional arguments that will be passed to the given `$function` as is
  * @return PromiseInterface<mixed>
  * @since 3.0.0
@@ -730,9 +730,9 @@ function series(iterable $tasks): PromiseInterface
         assert($tasks instanceof \Iterator);
     }
 
-    /** @var callable():void $next */
     $taskCallback = function ($result) use (&$results, &$next) {
         $results[] = $result;
+        assert($next instanceof \Closure);
         $next();
     };
 

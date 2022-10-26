@@ -193,6 +193,7 @@ class ParallelTest extends TestCase
         );
 
         $promise = React\Async\parallel($tasks);
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
 
         $this->assertSame(2, $cancelled);
