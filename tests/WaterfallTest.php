@@ -6,10 +6,11 @@ use React;
 use React\EventLoop\Loop;
 use React\Promise\Promise;
 use function React\Promise\reject;
+use function React\Promise\resolve;
 
 class WaterfallTest extends TestCase
 {
-    public function testWaterfallWithoutTasks()
+    public function testWaterfallWithoutTasks(): void
     {
         $tasks = array();
 
@@ -18,11 +19,11 @@ class WaterfallTest extends TestCase
         $promise->then($this->expectCallableOnceWith(null));
     }
 
-    public function testWaterfallWithoutTasksFromEmptyGeneratorResolvesWithNull()
+    public function testWaterfallWithoutTasksFromEmptyGeneratorResolvesWithNull(): void
     {
         $tasks = (function () {
-            if (false) {
-                yield;
+            if (false) { // @phpstan-ignore-line
+                yield fn () => resolve(null);
             }
         })();
 
@@ -31,7 +32,7 @@ class WaterfallTest extends TestCase
         $promise->then($this->expectCallableOnceWith(null));
     }
 
-    public function testWaterfallWithTasks()
+    public function testWaterfallWithTasks(): void
     {
         $tasks = array(
             function ($foo = 'foo') {
@@ -70,7 +71,7 @@ class WaterfallTest extends TestCase
         $timer->assertInRange(0.15, 0.30);
     }
 
-    public function testWaterfallWithTasksFromGeneratorResolvesWithFinalFulfillmentValue()
+    public function testWaterfallWithTasksFromGeneratorResolvesWithFinalFulfillmentValue(): void
     {
         $tasks = (function () {
             yield function ($foo = 'foo') {
@@ -109,7 +110,7 @@ class WaterfallTest extends TestCase
         $timer->assertInRange(0.15, 0.30);
     }
 
-    public function testWaterfallWithError()
+    public function testWaterfallWithError(): void
     {
         $called = 0;
 
@@ -140,12 +141,12 @@ class WaterfallTest extends TestCase
         $this->assertSame(1, $called);
     }
 
-    public function testWaterfallWithErrorFromInfiniteGeneratorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks()
+    public function testWaterfallWithErrorFromInfiniteGeneratorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks(): void
     {
         $called = 0;
 
         $tasks = (function () use (&$called) {
-            while (true) {
+            while (true) { // @phpstan-ignore-line
                 yield function () use (&$called) {
                     return reject(new \RuntimeException('Rejected ' . ++$called));
                 };
@@ -159,14 +160,14 @@ class WaterfallTest extends TestCase
         $this->assertSame(1, $called);
     }
 
-    public function testWaterfallWithErrorFromInfiniteIteratorAggregateReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks()
+    public function testWaterfallWithErrorFromInfiniteIteratorAggregateReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks(): void
     {
         $tasks = new class() implements \IteratorAggregate {
-            public $called = 0;
+            public int $called = 0;
 
             public function getIterator(): \Iterator
             {
-                while (true) {
+                while (true) { // @phpstan-ignore-line
                     yield function () {
                         return reject(new \RuntimeException('Rejected ' . ++$this->called));
                     };
@@ -181,7 +182,7 @@ class WaterfallTest extends TestCase
         $this->assertSame(1, $tasks->called);
     }
 
-    public function testWaterfallWillCancelFirstPendingPromiseWhenCallingCancelOnResultingPromise()
+    public function testWaterfallWillCancelFirstPendingPromiseWhenCallingCancelOnResultingPromise(): void
     {
         $cancelled = 0;
 

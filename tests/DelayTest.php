@@ -10,7 +10,7 @@ use function React\Async\delay;
 
 class DelayTest extends TestCase
 {
-    public function testDelayBlocksForGivenPeriod()
+    public function testDelayBlocksForGivenPeriod(): void
     {
         $time = microtime(true);
         delay(0.02);
@@ -20,7 +20,7 @@ class DelayTest extends TestCase
         $this->assertLessThan(0.03, $time);
     }
 
-    public function testDelaySmallPeriodBlocksForCloseToZeroSeconds()
+    public function testDelaySmallPeriodBlocksForCloseToZeroSeconds(): void
     {
         $time = microtime(true);
         delay(0.000001);
@@ -29,7 +29,7 @@ class DelayTest extends TestCase
         $this->assertLessThan(0.01, $time);
     }
 
-    public function testDelayNegativePeriodBlocksForCloseToZeroSeconds()
+    public function testDelayNegativePeriodBlocksForCloseToZeroSeconds(): void
     {
         $time = microtime(true);
         delay(-1);
@@ -38,7 +38,7 @@ class DelayTest extends TestCase
         $this->assertLessThan(0.01, $time);
     }
 
-    public function testAwaitAsyncDelayBlocksForGivenPeriod()
+    public function testAwaitAsyncDelayBlocksForGivenPeriod(): void
     {
         $promise = async(function () {
             delay(0.02);
@@ -52,11 +52,13 @@ class DelayTest extends TestCase
         $this->assertLessThan(0.03, $time);
     }
 
-    public function testAwaitAsyncDelayCancelledImmediatelyStopsTimerAndBlocksForCloseToZeroSeconds()
+    public function testAwaitAsyncDelayCancelledImmediatelyStopsTimerAndBlocksForCloseToZeroSeconds(): void
     {
         $promise = async(function () {
             delay(1.0);
         })();
+
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
 
         $time = microtime(true);
@@ -70,11 +72,13 @@ class DelayTest extends TestCase
         $this->assertLessThan(0.03, $time);
     }
 
-    public function testAwaitAsyncDelayCancelledAfterSmallPeriodStopsTimerAndBlocksUntilCancelled()
+    public function testAwaitAsyncDelayCancelledAfterSmallPeriodStopsTimerAndBlocksUntilCancelled(): void
     {
         $promise = async(function () {
             delay(1.0);
         })();
+
+        assert(method_exists($promise, 'cancel'));
         Loop::addTimer(0.02, fn() => $promise->cancel());
 
         $time = microtime(true);
