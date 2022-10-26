@@ -6,10 +6,11 @@ use React;
 use React\EventLoop\Loop;
 use React\Promise\Promise;
 use function React\Promise\reject;
+use function React\Promise\resolve;
 
 class SeriesTest extends TestCase
 {
-    public function testSeriesWithoutTasks()
+    public function testSeriesWithoutTasks(): void
     {
         $tasks = array();
 
@@ -18,11 +19,11 @@ class SeriesTest extends TestCase
         $promise->then($this->expectCallableOnceWith(array()));
     }
 
-    public function testSeriesWithoutTasksFromEmptyGeneratorResolvesWithEmptyArray()
+    public function testSeriesWithoutTasksFromEmptyGeneratorResolvesWithEmptyArray(): void
     {
         $tasks = (function () {
-            if (false) {
-                yield;
+            if (false) { // @phpstan-ignore-line
+                yield function () { return resolve(null); };
             }
         })();
 
@@ -31,7 +32,7 @@ class SeriesTest extends TestCase
         $promise->then($this->expectCallableOnceWith([]));
     }
 
-    public function testSeriesWithTasks()
+    public function testSeriesWithTasks(): void
     {
         $tasks = array(
             function () {
@@ -63,7 +64,7 @@ class SeriesTest extends TestCase
         $timer->assertInRange(0.10, 0.20);
     }
 
-    public function testSeriesWithTasksFromGeneratorResolvesWithArrayOfFulfillmentValues()
+    public function testSeriesWithTasksFromGeneratorResolvesWithArrayOfFulfillmentValues(): void
     {
         $tasks = (function () {
             yield function () {
@@ -95,7 +96,7 @@ class SeriesTest extends TestCase
         $timer->assertInRange(0.10, 0.20);
     }
 
-    public function testSeriesWithError()
+    public function testSeriesWithError(): void
     {
         $called = 0;
 
@@ -126,12 +127,12 @@ class SeriesTest extends TestCase
         $this->assertSame(1, $called);
     }
 
-    public function testSeriesWithErrorFromInfiniteGeneratorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks()
+    public function testSeriesWithErrorFromInfiniteGeneratorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks(): void
     {
         $called = 0;
 
         $tasks = (function () use (&$called) {
-            while (true) {
+            while (true) { // @phpstan-ignore-line
                 yield function () use (&$called) {
                     return reject(new \RuntimeException('Rejected ' . ++$called));
                 };
@@ -145,14 +146,15 @@ class SeriesTest extends TestCase
         $this->assertSame(1, $called);
     }
 
-    public function testSeriesWithErrorFromInfiniteIteratorAggregateReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks()
+    public function testSeriesWithErrorFromInfiniteIteratorAggregateReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks(): void
     {
         $tasks = new class() implements \IteratorAggregate {
+            /** @var int */
             public $called = 0;
 
             public function getIterator(): \Iterator
             {
-                while (true) {
+                while (true) { // @phpstan-ignore-line
                     yield function () {
                         return reject(new \RuntimeException('Rejected ' . ++$this->called));
                     };
@@ -167,7 +169,7 @@ class SeriesTest extends TestCase
         $this->assertSame(1, $tasks->called);
     }
 
-    public function testSeriesWillCancelFirstPendingPromiseWhenCallingCancelOnResultingPromise()
+    public function testSeriesWillCancelFirstPendingPromiseWhenCallingCancelOnResultingPromise(): void
     {
         $cancelled = 0;
 

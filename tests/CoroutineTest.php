@@ -9,7 +9,7 @@ use function React\Promise\resolve;
 
 class CoroutineTest extends TestCase
 {
-    public function testCoroutineReturnsFulfilledPromiseIfFunctionReturnsWithoutGenerator()
+    public function testCoroutineReturnsFulfilledPromiseIfFunctionReturnsWithoutGenerator(): void
     {
         $promise = coroutine(function () {
             return 42;
@@ -18,10 +18,10 @@ class CoroutineTest extends TestCase
         $promise->then($this->expectCallableOnceWith(42));
     }
 
-    public function testCoroutineReturnsFulfilledPromiseIfFunctionReturnsImmediately()
+    public function testCoroutineReturnsFulfilledPromiseIfFunctionReturnsImmediately(): void
     {
         $promise = coroutine(function () {
-            if (false) {
+            if (false) { // @phpstan-ignore-line
                 yield;
             }
             return 42;
@@ -30,7 +30,7 @@ class CoroutineTest extends TestCase
         $promise->then($this->expectCallableOnceWith(42));
     }
 
-    public function testCoroutineReturnsFulfilledPromiseIfFunctionReturnsAfterYieldingPromise()
+    public function testCoroutineReturnsFulfilledPromiseIfFunctionReturnsAfterYieldingPromise(): void
     {
         $promise = coroutine(function () {
             $value = yield resolve(42);
@@ -40,7 +40,7 @@ class CoroutineTest extends TestCase
         $promise->then($this->expectCallableOnceWith(42));
     }
 
-    public function testCoroutineReturnsRejectedPromiseIfFunctionThrowsWithoutGenerator()
+    public function testCoroutineReturnsRejectedPromiseIfFunctionThrowsWithoutGenerator(): void
     {
         $promise = coroutine(function () {
             throw new \RuntimeException('Foo');
@@ -49,10 +49,10 @@ class CoroutineTest extends TestCase
         $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Foo')));
     }
 
-    public function testCoroutineReturnsRejectedPromiseIfFunctionThrowsImmediately()
+    public function testCoroutineReturnsRejectedPromiseIfFunctionThrowsImmediately(): void
     {
         $promise = coroutine(function () {
-            if (false) {
+            if (false) { // @phpstan-ignore-line
                 yield;
             }
             throw new \RuntimeException('Foo');
@@ -61,7 +61,7 @@ class CoroutineTest extends TestCase
         $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Foo')));
     }
 
-    public function testCoroutineReturnsRejectedPromiseIfFunctionThrowsAfterYieldingPromise()
+    public function testCoroutineReturnsRejectedPromiseIfFunctionThrowsAfterYieldingPromise(): void
     {
         $promise = coroutine(function () {
             $reason = yield resolve('Foo');
@@ -71,7 +71,7 @@ class CoroutineTest extends TestCase
         $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Foo')));
     }
 
-    public function testCoroutineReturnsRejectedPromiseIfFunctionThrowsAfterYieldingRejectedPromise()
+    public function testCoroutineReturnsRejectedPromiseIfFunctionThrowsAfterYieldingRejectedPromise(): void
     {
         $promise = coroutine(function () {
             try {
@@ -84,7 +84,7 @@ class CoroutineTest extends TestCase
         $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Foo')));
     }
 
-    public function testCoroutineReturnsFulfilledPromiseIfFunctionReturnsAfterYieldingRejectedPromise()
+    public function testCoroutineReturnsFulfilledPromiseIfFunctionReturnsAfterYieldingRejectedPromise(): void
     {
         $promise = coroutine(function () {
             try {
@@ -97,7 +97,7 @@ class CoroutineTest extends TestCase
         $promise->then($this->expectCallableOnceWith(42));
     }
 
-    public function testCoroutineReturnsRejectedPromiseIfFunctionYieldsInvalidValue()
+    public function testCoroutineReturnsRejectedPromiseIfFunctionYieldsInvalidValue(): void
     {
         $promise = coroutine(function () {
             yield 42;
@@ -106,7 +106,7 @@ class CoroutineTest extends TestCase
         $promise->then(null, $this->expectCallableOnceWith(new \UnexpectedValueException('Expected coroutine to yield React\Promise\PromiseInterface, but got integer')));
     }
 
-    public function testCancelCoroutineWillReturnRejectedPromiseWhenCancellingPendingPromiseRejects()
+    public function testCancelCoroutineWillReturnRejectedPromiseWhenCancellingPendingPromiseRejects(): void
     {
         $promise = coroutine(function () {
             yield new Promise(function () { }, function () {
@@ -120,7 +120,7 @@ class CoroutineTest extends TestCase
         $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Operation cancelled')));
     }
 
-    public function testCancelCoroutineWillReturnFulfilledPromiseWhenCancellingPendingPromiseRejectsInsideCatchThatReturnsValue()
+    public function testCancelCoroutineWillReturnFulfilledPromiseWhenCancellingPendingPromiseRejectsInsideCatchThatReturnsValue(): void
     {
         $promise = coroutine(function () {
             try {
@@ -138,7 +138,7 @@ class CoroutineTest extends TestCase
         $promise->then($this->expectCallableOnceWith(42));
     }
 
-    public function testCancelCoroutineWillReturnPendigPromiseWhenCancellingFirstPromiseRejectsInsideCatchThatYieldsSecondPromise()
+    public function testCancelCoroutineWillReturnPendigPromiseWhenCancellingFirstPromiseRejectsInsideCatchThatYieldsSecondPromise(): void
     {
         $promise = coroutine(function () {
             try {
@@ -158,7 +158,7 @@ class CoroutineTest extends TestCase
         $promise->then($this->expectCallableNever(), $this->expectCallableNever());
     }
 
-    public function testCoroutineShouldNotCreateAnyGarbageReferencesWhenGeneratorReturns()
+    public function testCoroutineShouldNotCreateAnyGarbageReferencesWhenGeneratorReturns(): void
     {
         if (class_exists('React\Promise\When')) {
             $this->markTestSkipped('Not supported on legacy Promise v1 API');
@@ -168,7 +168,7 @@ class CoroutineTest extends TestCase
         gc_collect_cycles();
 
         $promise = coroutine(function () {
-            if (false) {
+            if (false) { // @phpstan-ignore-line
                 yield;
             }
             return 42;
@@ -179,7 +179,7 @@ class CoroutineTest extends TestCase
         $this->assertEquals(0, gc_collect_cycles());
     }
 
-    public function testCoroutineShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithExceptionImmediately()
+    public function testCoroutineShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithExceptionImmediately(): void
     {
         if (class_exists('React\Promise\When')) {
             $this->markTestSkipped('Not supported on legacy Promise v1 API');
@@ -198,7 +198,7 @@ class CoroutineTest extends TestCase
         $this->assertEquals(0, gc_collect_cycles());
     }
 
-    public function testCoroutineShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithExceptionOnCancellation()
+    public function testCoroutineShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithExceptionOnCancellation(): void
     {
         if (class_exists('React\Promise\When')) {
             $this->markTestSkipped('Not supported on legacy Promise v1 API');
@@ -219,7 +219,7 @@ class CoroutineTest extends TestCase
         $this->assertEquals(0, gc_collect_cycles());
     }
 
-    public function testCoroutineShouldNotCreateAnyGarbageReferencesWhenGeneratorThrowsBeforeFirstYield()
+    public function testCoroutineShouldNotCreateAnyGarbageReferencesWhenGeneratorThrowsBeforeFirstYield(): void
     {
         if (class_exists('React\Promise\When')) {
             $this->markTestSkipped('Not supported on legacy Promise v1 API');
@@ -229,7 +229,7 @@ class CoroutineTest extends TestCase
 
         $promise = coroutine(function () {
             throw new \RuntimeException('Failed', 42);
-            yield;
+            yield; // @phpstan-ignore-line
         });
 
         unset($promise);
@@ -237,7 +237,7 @@ class CoroutineTest extends TestCase
         $this->assertEquals(0, gc_collect_cycles());
     }
 
-    public function testCoroutineShouldNotCreateAnyGarbageReferencesWhenGeneratorYieldsInvalidValue()
+    public function testCoroutineShouldNotCreateAnyGarbageReferencesWhenGeneratorYieldsInvalidValue(): void
     {
         if (class_exists('React\Promise\When')) {
             $this->markTestSkipped('Not supported on legacy Promise v1 API');

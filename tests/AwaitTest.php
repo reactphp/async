@@ -8,7 +8,7 @@ use React\Promise\Promise;
 
 class AwaitTest extends TestCase
 {
-    public function testAwaitThrowsExceptionWhenPromiseIsRejectedWithException()
+    public function testAwaitThrowsExceptionWhenPromiseIsRejectedWithException(): void
     {
         $promise = new Promise(function () {
             throw new \Exception('test');
@@ -19,7 +19,7 @@ class AwaitTest extends TestCase
         React\Async\await($promise);
     }
 
-    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithFalse()
+    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithFalse(): void
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');
@@ -34,7 +34,7 @@ class AwaitTest extends TestCase
         React\Async\await($promise);
     }
 
-    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithNull()
+    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithNull(): void
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');
@@ -49,7 +49,7 @@ class AwaitTest extends TestCase
         React\Async\await($promise);
     }
 
-    public function testAwaitThrowsErrorWhenPromiseIsRejectedWithError()
+    public function testAwaitThrowsErrorWhenPromiseIsRejectedWithError(): void
     {
         $promise = new Promise(function ($_, $reject) {
             throw new \Error('Test', 42);
@@ -61,7 +61,7 @@ class AwaitTest extends TestCase
         React\Async\await($promise);
     }
 
-    public function testAwaitReturnsValueWhenPromiseIsFullfilled()
+    public function testAwaitReturnsValueWhenPromiseIsFullfilled(): void
     {
         $promise = new Promise(function ($resolve) {
             $resolve(42);
@@ -70,7 +70,7 @@ class AwaitTest extends TestCase
         $this->assertEquals(42, React\Async\await($promise));
     }
 
-    public function testAwaitReturnsValueWhenPromiseIsFulfilledEvenWhenOtherTimerStopsLoop()
+    public function testAwaitReturnsValueWhenPromiseIsFulfilledEvenWhenOtherTimerStopsLoop(): void
     {
         $promise = new Promise(function ($resolve) {
             Loop::addTimer(0.02, function () use ($resolve) {
@@ -84,7 +84,7 @@ class AwaitTest extends TestCase
         $this->assertEquals(2, React\Async\await($promise));
     }
 
-    public function testAwaitWithAlreadyFulfilledPromiseWillReturnWithoutRunningLoop()
+    public function testAwaitWithAlreadyFulfilledPromiseWillReturnWithoutRunningLoop(): void
     {
         $now = true;
 
@@ -100,7 +100,7 @@ class AwaitTest extends TestCase
         $this->assertTrue($now);
     }
 
-    public function testAwaitWithAlreadyFulfilledPromiseWillReturnWithoutStoppingLoop()
+    public function testAwaitWithAlreadyFulfilledPromiseWillReturnWithoutStoppingLoop(): void
     {
         $ticks = 0;
 
@@ -128,7 +128,7 @@ class AwaitTest extends TestCase
         $this->assertEquals(2, $ticks);
     }
 
-    public function testAwaitWithPendingPromiseThatWillResolveWillStopLoopBeforeLastTimerFinishes()
+    public function testAwaitWithPendingPromiseThatWillResolveWillStopLoopBeforeLastTimerFinishes(): void
     {
         $promise = new Promise(function ($resolve) {
             Loop::addTimer(0.02, function () use ($resolve) {
@@ -159,7 +159,7 @@ class AwaitTest extends TestCase
         $this->assertEquals(1, $ticks);
     }
 
-    public function testAwaitWithAlreadyRejectedPromiseWillReturnWithoutStoppingLoop()
+    public function testAwaitWithAlreadyRejectedPromiseWillReturnWithoutStoppingLoop(): void
     {
         $ticks = 0;
 
@@ -191,7 +191,7 @@ class AwaitTest extends TestCase
         $this->assertEquals(2, $ticks);
     }
 
-    public function testAwaitWithPendingPromiseThatWillRejectWillStopLoopBeforeLastTimerFinishes()
+    public function testAwaitWithPendingPromiseThatWillRejectWillStopLoopBeforeLastTimerFinishes(): void
     {
         $promise = new Promise(function ($_, $reject) {
             Loop::addTimer(0.02, function () use (&$reject) {
@@ -227,7 +227,7 @@ class AwaitTest extends TestCase
         $this->assertEquals(1, $ticks);
     }
 
-    public function testAwaitShouldNotCreateAnyGarbageReferencesForResolvedPromise()
+    public function testAwaitShouldNotCreateAnyGarbageReferencesForResolvedPromise(): void
     {
         if (class_exists('React\Promise\When')) {
             $this->markTestSkipped('Not supported on legacy Promise v1 API');
@@ -244,7 +244,7 @@ class AwaitTest extends TestCase
         $this->assertEquals(0, gc_collect_cycles());
     }
 
-    public function testAwaitShouldNotCreateAnyGarbageReferencesForRejectedPromise()
+    public function testAwaitShouldNotCreateAnyGarbageReferencesForRejectedPromise(): void
     {
         if (class_exists('React\Promise\When')) {
             $this->markTestSkipped('Not supported on legacy Promise v1 API');
@@ -265,7 +265,7 @@ class AwaitTest extends TestCase
         $this->assertEquals(0, gc_collect_cycles());
     }
 
-    public function testAwaitShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithNullValue()
+    public function testAwaitShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithNullValue(): void
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');

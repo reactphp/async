@@ -6,10 +6,11 @@ use React;
 use React\EventLoop\Loop;
 use React\Promise\Promise;
 use function React\Promise\reject;
+use function React\Promise\resolve;
 
 class ParallelTest extends TestCase
 {
-    public function testParallelWithoutTasks()
+    public function testParallelWithoutTasks(): void
     {
         $tasks = array();
 
@@ -18,11 +19,11 @@ class ParallelTest extends TestCase
         $promise->then($this->expectCallableOnceWith(array()));
     }
 
-    public function testParallelWithoutTasksFromEmptyGeneratorResolvesWithEmptyArray()
+    public function testParallelWithoutTasksFromEmptyGeneratorResolvesWithEmptyArray(): void
     {
         $tasks = (function () {
-            if (false) {
-                yield;
+            if (false) { // @phpstan-ignore-line
+                yield function () { return resolve(null); };
             }
         })();
 
@@ -31,7 +32,7 @@ class ParallelTest extends TestCase
         $promise->then($this->expectCallableOnceWith([]));
     }
 
-    public function testParallelWithTasks()
+    public function testParallelWithTasks(): void
     {
         $tasks = array(
             function () {
@@ -63,7 +64,7 @@ class ParallelTest extends TestCase
         $timer->assertInRange(0.1, 0.2);
     }
 
-    public function testParallelWithTasksFromGeneratorResolvesWithArrayOfFulfillmentValues()
+    public function testParallelWithTasksFromGeneratorResolvesWithArrayOfFulfillmentValues(): void
     {
         $tasks = (function () {
             yield function () {
@@ -95,7 +96,7 @@ class ParallelTest extends TestCase
         $timer->assertInRange(0.1, 0.2);
     }
 
-    public function testParallelWithErrorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks()
+    public function testParallelWithErrorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks(): void
     {
         $called = 0;
 
@@ -127,12 +128,12 @@ class ParallelTest extends TestCase
         $this->assertSame(2, $called);
     }
 
-    public function testParallelWithErrorFromInfiniteGeneratorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks()
+    public function testParallelWithErrorFromInfiniteGeneratorReturnsPromiseRejectedWithExceptionFromTaskAndStopsCallingAdditionalTasks(): void
     {
         $called = 0;
 
         $tasks = (function () use (&$called) {
-            while (true) {
+            while (true) { // @phpstan-ignore-line
                 yield function () use (&$called) {
                     return reject(new \RuntimeException('Rejected ' . ++$called));
                 };
@@ -146,7 +147,7 @@ class ParallelTest extends TestCase
         $this->assertSame(1, $called);
     }
 
-    public function testParallelWithErrorWillCancelPendingPromises()
+    public function testParallelWithErrorWillCancelPendingPromises(): void
     {
         $cancelled = 0;
 
@@ -175,7 +176,7 @@ class ParallelTest extends TestCase
         $this->assertSame(1, $cancelled);
     }
 
-    public function testParallelWillCancelPendingPromisesWhenCallingCancelOnResultingPromise()
+    public function testParallelWillCancelPendingPromisesWhenCallingCancelOnResultingPromise(): void
     {
         $cancelled = 0;
 
@@ -199,7 +200,7 @@ class ParallelTest extends TestCase
         $this->assertSame(2, $cancelled);
     }
 
-    public function testParallelWithDelayedErrorReturnsPromiseRejectedWithExceptionFromTask()
+    public function testParallelWithDelayedErrorReturnsPromiseRejectedWithExceptionFromTask(): void
     {
         $called = 0;
 
