@@ -31,6 +31,7 @@
         "react/promise": "^3.0 || ^2.8 || ^1.2.1"
     },
     "require-dev": {
+        "phpstan/phpstan": "1.10.18 || 1.4.10",
         "phpunit/phpunit": "^9.5 || ^7.5"
     },
     "autoload": {

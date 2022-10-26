@@ -114,6 +114,7 @@ class CoroutineTest extends TestCase
             });
         });
 
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
 
         $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Operation cancelled')));
@@ -131,6 +132,7 @@ class CoroutineTest extends TestCase
             }
         });
 
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
 
         $promise->then($this->expectCallableOnceWith(42));
@@ -150,6 +152,7 @@ class CoroutineTest extends TestCase
             }
         });
 
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
 
         $promise->then($this->expectCallableNever(), $this->expectCallableNever());
@@ -209,6 +212,7 @@ class CoroutineTest extends TestCase
             });
         });
 
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
         unset($promise);
 
