@@ -100,6 +100,33 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
+    public function testAwaitThrowsExceptionAfterCompletingCurrentTickWhenPromiseIsRejected(callable $await)
+    {
+        $deferred = new Deferred();
+
+        $ticks = 0;
+        Loop::futureTick(function () use (&$ticks) {
+            ++$ticks;
+        });
+        Loop::futureTick(function () use (&$ticks, $deferred) {
+            ++$ticks;
+            $deferred->reject(new \RuntimeException($ticks . ' ticks'));
+        });
+        Loop::futureTick(function () use (&$ticks) {
+            ++$ticks;
+        });
+
+        try {
+            $await($deferred->promise());
+        } catch (\RuntimeException $e) {
+            $this->assertEquals('2 ticks', $e->getMessage());
+            $this->assertEquals(3, $ticks);
+        }
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
     public function testAwaitThrowsExceptionImmediatelyInCustomFiberWhenPromiseIsRejected(callable $await)
     {
         $fiber = new \Fiber(function () use ($await) {
@@ -249,6 +276,29 @@ class AwaitTest extends TestCase
 
         $this->assertEquals(42, $await($promise));
         $this->assertEquals(1, $ticks);
+    }
+
+    /**
+     * @dataProvider provideAwaiters
+     */
+    public function testAwaitAsyncReturnsValueAfterCompletingCurrentTickWhenPromiseIsFulfilled(callable $await)
+    {
+        $deferred = new Deferred();
+
+        $ticks = 0;
+        Loop::futureTick(function () use (&$ticks) {
+            ++$ticks;
+        });
+        Loop::futureTick(function () use (&$ticks, $deferred) {
+            ++$ticks;
+            $deferred->resolve($ticks);
+        });
+        Loop::futureTick(function () use (&$ticks) {
+            ++$ticks;
+        });
+
+        $this->assertEquals(2, $await($deferred->promise()));
+        $this->assertEquals(3, $ticks);
     }
 
     /**
