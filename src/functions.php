@@ -4,6 +4,7 @@ namespace React\Async;
 
 use React\EventLoop\Loop;
 use React\Promise\Deferred;
+use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use function React\Promise\reject;
 use function React\Promise\resolve;
@@ -100,6 +101,85 @@ function await(PromiseInterface $promise)
     return $resolved;
 }
 
+
+/**
+ * Delay program execution for duration given in `$seconds`.
+ *
+ * ```php
+ * React\Async\delay($seconds);
+ * ```
+ *
+ * This function will only return after the given number of `$seconds` have
+ * elapsed. If there are no other events attached to this loop, it will behave
+ * similar to PHP's [`sleep()` function](https://www.php.net/manual/en/function.sleep.php).
+ *
+ * ```php
+ * echo 'a';
+ * React\Async\delay(1.0);
+ * echo 'b';
+ *
+ * // prints "a" at t=0.0s
+ * // prints "b" at t=1.0s
+ * ```
+ *
+ * Unlike PHP's [`sleep()` function](https://www.php.net/manual/en/function.sleep.php),
+ * this function may not necessarily halt execution of the entire process thread.
+ * Instead, it allows the event loop to run any other events attached to the
+ * same loop until the delay returns:
+ *
+ * ```php
+ * echo 'a';
+ * Loop::addTimer(1.0, function () {
+ *     echo 'b';
+ * });
+ * React\Async\delay(3.0);
+ * echo 'c';
+ *
+ * // prints "a" at t=0.0s
+ * // prints "b" at t=1.0s
+ * // prints "c" at t=3.0s
+ * ```
+ *
+ * This behavior is especially useful if you want to delay the program execution
+ * of a particular routine, such as when building a simple polling or retry
+ * mechanism:
+ *
+ * ```php
+ * try {
+ *     something();
+ * } catch (Throwable $e) {
+ *     // in case of error, retry after a short delay
+ *     React\Async\delay(1.0);
+ *     something();
+ * }
+ * ```
+ *
+ * Because this function only returns after some time has passed, it can be
+ * considered *blocking* from the perspective of the calling code. While the
+ * delay is running, this function will assume control over the event loop.
+ * Internally, it will `run()` the [default loop](https://github.com/reactphp/event-loop#loop)
+ * until the delay returns and then calls `stop()` to terminate execution of the
+ * loop. This means this function is more suited for short-lived promise executions
+ * when using promise-based APIs is not feasible. For long-running applications,
+ * using promise-based APIs by leveraging chained `then()` calls is usually preferable.
+ *
+ * Internally, the `$seconds` argument will be used as a timer for the loop so that
+ * it keeps running until this timer triggers. This implies that if you pass a
+ * really small (or negative) value, it will still start a timer and will thus
+ * trigger at the earliest possible time in the future.
+ *
+ * @param float $seconds
+ * @return void
+ * @uses await()
+ */
+function delay(float $seconds): void
+{
+    await(new Promise(function (callable $resolve) use ($seconds): void {
+        Loop::addTimer($seconds, function () use ($resolve): void {
+            $resolve(null);
+        });
+    }));
+}
 
 /**
  * Execute a Generator-based coroutine to "await" promises.
