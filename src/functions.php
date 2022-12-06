@@ -2,6 +2,8 @@
 
 namespace React\Async;
 
+use React\EventLoop\Loop;
+use React\EventLoop\TimerInterface;
 use React\Promise\Deferred;
 use React\Promise\Promise;
 use React\Promise\PromiseInterface;
@@ -153,17 +155,16 @@ use function React\Promise\resolve;
  * The returned promise is implemented in such a way that it can be cancelled
  * when it is still pending. Cancelling a pending promise will cancel any awaited
  * promises inside that fiber or any nested fibers. As such, the following example
- * will only output `ab` and cancel the pending [`sleep()`](https://reactphp.org/promise-timer/#sleep).
+ * will only output `ab` and cancel the pending [`delay()`](#delay).
  * The [`await()`](#await) calls in this example would throw a `RuntimeException`
- * from the cancelled [`sleep()`](https://reactphp.org/promise-timer/#sleep) call
- * that bubbles up through the fibers.
+ * from the cancelled [`delay()`](#delay) call that bubbles up through the fibers.
  *
  * ```php
  * $promise = async(static function (): int {
  *     echo 'a';
  *     await(async(static function (): void {
  *         echo 'b';
- *         await(React\Promise\Timer\sleep(2));
+ *         delay(2);
  *         echo 'c';
  *     })());
  *     echo 'd';
@@ -214,7 +215,6 @@ function async(callable $function): callable
         return $promise;
     };
 }
-
 
 /**
  * Block waiting for the given `$promise` to be fulfilled.
@@ -350,6 +350,127 @@ function await(PromiseInterface $promise): mixed
     $fiber = FiberFactory::create();
 
     return $fiber->suspend();
+}
+
+/**
+ * Delay program execution for duration given in `$seconds`.
+ *
+ * ```php
+ * React\Async\delay($seconds);
+ * ```
+ *
+ * This function will only return after the given number of `$seconds` have
+ * elapsed. If there are no other events attached to this loop, it will behave
+ * similar to PHP's [`sleep()` function](https://www.php.net/manual/en/function.sleep.php).
+ *
+ * ```php
+ * echo 'a';
+ * React\Async\delay(1.0);
+ * echo 'b';
+ *
+ * // prints "a" at t=0.0s
+ * // prints "b" at t=1.0s
+ * ```
+ *
+ * Unlike PHP's [`sleep()` function](https://www.php.net/manual/en/function.sleep.php),
+ * this function may not necessarily halt execution of the entire process thread.
+ * Instead, it allows the event loop to run any other events attached to the
+ * same loop until the delay returns:
+ *
+ * ```php
+ * echo 'a';
+ * Loop::addTimer(1.0, function () {
+ *     echo 'b';
+ * });
+ * React\Async\delay(3.0);
+ * echo 'c';
+ *
+ * // prints "a" at t=0.0s
+ * // prints "b" at t=1.0s
+ * // prints "c" at t=3.0s
+ * ```
+ *
+ * This behavior is especially useful if you want to delay the program execution
+ * of a particular routine, such as when building a simple polling or retry
+ * mechanism:
+ *
+ * ```php
+ * try {
+ *     something();
+ * } catch (Throwable) {
+ *     // in case of error, retry after a short delay
+ *     React\Async\delay(1.0);
+ *     something();
+ * }
+ * ```
+ *
+ * Because this function only returns after some time has passed, it can be
+ * considered *blocking* from the perspective of the calling code. You can avoid
+ * this blocking behavior by wrapping it in an [`async()` function](#async) call.
+ * Everything inside this function will still be blocked, but everything outside
+ * this function can be executed asynchronously without blocking:
+ *
+ * ```php
+ * Loop::addTimer(0.5, React\Async\async(function () {
+ *     echo 'a';
+ *     React\Async\delay(1.0);
+ *     echo 'c';
+ * }));
+ *
+ * Loop::addTimer(1.0, function () {
+ *     echo 'b';
+ * });
+ *
+ * // prints "a" at t=0.5s
+ * // prints "b" at t=1.0s
+ * // prints "c" at t=1.5s
+ * ```
+ *
+ * See also the [`async()` function](#async) for more details.
+ *
+ * Internally, the `$seconds` argument will be used as a timer for the loop so that
+ * it keeps running until this timer triggers. This implies that if you pass a
+ * really small (or negative) value, it will still start a timer and will thus
+ * trigger at the earliest possible time in the future.
+ *
+ * The function is implemented in such a way that it can be cancelled when it is
+ * running inside an [`async()` function](#async). Cancelling the resulting
+ * promise will clean up any pending timers and throw a `RuntimeException` from
+ * the pending delay which in turn would reject the resulting promise.
+ *
+ * ```php
+ * $promise = async(function () {
+ *     echo 'a';
+ *     delay(3.0);
+ *     echo 'b';
+ * });
+ *
+ * Loop::addTimer(2.0, function () use ($promise) {
+ *     $promise->cancel();
+ * });
+ *
+ * // prints "a" at t=0.0s
+ * // rejects $promise at t=2.0
+ * // never prints "b"
+ * ```
+ *
+ * @return void
+ * @throws \RuntimeException when the function is cancelled inside an `async()` function
+ * @see async()
+ * @uses await()
+ */
+function delay(float $seconds): void
+{
+    /** @var ?TimerInterface $timer */
+    $timer = null;
+
+    await(new Promise(function (callable $resolve) use ($seconds, &$timer): void {
+        $timer = Loop::addTimer($seconds, fn() => $resolve(null));
+    }, function () use (&$timer): void {
+        assert($timer instanceof TimerInterface);
+        Loop::cancelTimer($timer);
+        throw new \RuntimeException('Delay cancelled');
+    }));
 }
 
 /**
