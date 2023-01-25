@@ -652,8 +652,8 @@ function coroutine(callable $function, mixed ...$args): PromiseInterface
 }
 
 /**
- * @param iterable<callable():PromiseInterface<mixed,Exception>> $tasks
- * @return PromiseInterface<array<mixed>,Exception>
+ * @param iterable<callable():PromiseInterface<mixed>> $tasks
+ * @return PromiseInterface<array<mixed>>
  */
 function parallel(iterable $tasks): PromiseInterface
 {
@@ -711,8 +711,8 @@ function parallel(iterable $tasks): PromiseInterface
 }
 
 /**
- * @param iterable<callable():PromiseInterface<mixed,Exception>> $tasks
- * @return PromiseInterface<array<mixed>,Exception>
+ * @param iterable<callable():PromiseInterface<mixed>> $tasks
+ * @return PromiseInterface<array<mixed>>
  */
 function series(iterable $tasks): PromiseInterface
 {
@@ -762,8 +762,8 @@ function series(iterable $tasks): PromiseInterface
 }
 
 /**
- * @param iterable<callable(mixed=):PromiseInterface<mixed,Exception>> $tasks
- * @return PromiseInterface<mixed,Exception>
+ * @param iterable<callable(mixed=):PromiseInterface<mixed>> $tasks
+ * @return PromiseInterface<mixed>
  */
 function waterfall(iterable $tasks): PromiseInterface
 {
