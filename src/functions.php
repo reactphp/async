@@ -179,8 +179,8 @@ function delay($seconds)
 }
 
 /**
- * @param array<callable():PromiseInterface<mixed,Exception>> $tasks
- * @return PromiseInterface<array<mixed>,Exception>
+ * @param array<callable():PromiseInterface<mixed>> $tasks
+ * @return PromiseInterface<array<mixed>>
  */
 function parallel(array $tasks)
 {
@@ -237,8 +237,8 @@ function parallel(array $tasks)
 }
 
 /**
- * @param array<callable():PromiseInterface<mixed,Exception>> $tasks
- * @return PromiseInterface<array<mixed>,Exception>
+ * @param array<callable():PromiseInterface<mixed>> $tasks
+ * @return PromiseInterface<array<mixed>>
  */
 function series(array $tasks)
 {
@@ -277,8 +277,8 @@ function series(array $tasks)
 }
 
 /**
- * @param array<callable(mixed=):PromiseInterface<mixed,Exception>> $tasks
- * @return PromiseInterface<mixed,Exception>
+ * @param array<callable(mixed=):PromiseInterface<mixed>> $tasks
+ * @return PromiseInterface<mixed>
  */
 function waterfall(array $tasks)
 {
