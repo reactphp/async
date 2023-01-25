@@ -161,7 +161,7 @@ trigger at the earliest possible time in the future.
 
 ### parallel()
 
-The `parallel(array<callable():PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<array<mixed>,Exception>` function can be used
+The `parallel(array<callable():PromiseInterface<mixed>> $tasks): PromiseInterface<array<mixed>>` function can be used
 like this:
 
 ```php
@@ -203,7 +203,7 @@ React\Async\parallel([
 
 ### series()
 
-The `series(array<callable():PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<array<mixed>,Exception>` function can be used
+The `series(array<callable():PromiseInterface<mixed>> $tasks): PromiseInterface<array<mixed>>` function can be used
 like this:
 
 ```php
@@ -245,7 +245,7 @@ React\Async\series([
 
 ### waterfall()
 
-The `waterfall(array<callable(mixed=):PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<mixed,Exception>` function can be used
+The `waterfall(array<callable(mixed=):PromiseInterface<mixed>> $tasks): PromiseInterface<mixed>` function can be used
 like this:
 
 ```php
