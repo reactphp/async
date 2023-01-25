@@ -498,7 +498,7 @@ Loop::addTimer(2.0, function () use ($promise) {
 
 ### parallel()
 
-The `parallel(iterable<callable():PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<array<mixed>,Exception>` function can be used
+The `parallel(iterable<callable():PromiseInterface<mixed>> $tasks): PromiseInterface<array<mixed>>` function can be used
 like this:
 
 ```php
@@ -540,7 +540,7 @@ React\Async\parallel([
 
 ### series()
 
-The `series(iterable<callable():PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<array<mixed>,Exception>` function can be used
+The `series(iterable<callable():PromiseInterface<mixed>> $tasks): PromiseInterface<array<mixed>>` function can be used
 like this:
 
 ```php
@@ -582,7 +582,7 @@ React\Async\series([
 
 ### waterfall()
 
-The `waterfall(iterable<callable(mixed=):PromiseInterface<mixed,Exception>> $tasks): PromiseInterface<mixed,Exception>` function can be used
+The `waterfall(iterable<callable(mixed=):PromiseInterface<mixed>> $tasks): PromiseInterface<mixed>` function can be used
 like this:
 
 ```php
