@@ -63,7 +63,14 @@ final class SimpleFiber implements FiberInterface
                 });
             }
 
-            return (self::$scheduler->isStarted() ? self::$scheduler->resume() : self::$scheduler->start())();
+            $ret = (self::$scheduler->isStarted() ? self::$scheduler->resume() : self::$scheduler->start());
+            assert(is_callable($ret));
+
+            Loop::stop();
+            self::$scheduler->resume();
+            assert(self::$scheduler->isTerminated());
+
+            return $ret();
         }
 
         return \Fiber::suspend();
