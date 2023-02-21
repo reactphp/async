@@ -22,3 +22,24 @@ jobs:
           ini-file: development
       - run: composer install
       - run: vendor/bin/phpunit --coverage-text
+
+  PHPStan:
+    name: PHPStan (PHP ${{ matrix.php }})
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        php:
+          - 8.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: phpstan:1.8.8
+      - name: Install Composer dependencies
+        run: composer install
+      - name: Run static analysis
+        run: phpstan analyse
