@@ -14,7 +14,7 @@ use function React\Promise\resolve;
 
 class AsyncTest extends TestCase
 {
-    public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsValue()
+    public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsValue(): void
     {
         $promise = async(function () {
             return 42;
@@ -28,7 +28,7 @@ class AsyncTest extends TestCase
         $this->assertEquals(42, $value);
     }
 
-    public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsPromiseThatFulfillsWithValue()
+    public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsPromiseThatFulfillsWithValue(): void
     {
         $promise = async(function () {
             return resolve(42);
@@ -42,7 +42,7 @@ class AsyncTest extends TestCase
         $this->assertEquals(42, $value);
     }
 
-    public function testAsyncReturnsPromiseThatRejectsWithExceptionWhenCallbackThrows()
+    public function testAsyncReturnsPromiseThatRejectsWithExceptionWhenCallbackThrows(): void
     {
         $promise = async(function () {
             throw new \RuntimeException('Foo', 42);
@@ -59,7 +59,7 @@ class AsyncTest extends TestCase
         $this->assertEquals(42, $exception->getCode());
     }
 
-    public function testAsyncReturnsPromiseThatRejectsWithExceptionWhenCallbackReturnsPromiseThatRejectsWithException()
+    public function testAsyncReturnsPromiseThatRejectsWithExceptionWhenCallbackReturnsPromiseThatRejectsWithException(): void
     {
         $promise = async(function () {
             return reject(new \RuntimeException('Foo', 42));
@@ -76,7 +76,7 @@ class AsyncTest extends TestCase
         $this->assertEquals(42, $exception->getCode());
     }
 
-    public function testAsyncReturnsPendingPromiseWhenCallbackReturnsPendingPromise()
+    public function testAsyncReturnsPendingPromiseWhenCallbackReturnsPendingPromise(): void
     {
         $promise = async(function () {
             return new Promise(function () { });
@@ -85,7 +85,7 @@ class AsyncTest extends TestCase
         $promise->then($this->expectCallableNever(), $this->expectCallableNever());
     }
 
-    public function testAsyncWithAwaitReturnsReturnsPromiseFulfilledWithValueImmediatelyWhenPromiseIsFulfilled()
+    public function testAsyncWithAwaitReturnsReturnsPromiseFulfilledWithValueImmediatelyWhenPromiseIsFulfilled(): void
     {
         $deferred = new Deferred();
 
@@ -105,7 +105,7 @@ class AsyncTest extends TestCase
         $this->assertEquals(42, $return);
     }
 
-    public function testAsyncWithAwaitReturnsPromiseRejectedWithExceptionImmediatelyWhenPromiseIsRejected()
+    public function testAsyncWithAwaitReturnsPromiseRejectedWithExceptionImmediatelyWhenPromiseIsRejected(): void
     {
         $deferred = new Deferred();
 
@@ -122,13 +122,13 @@ class AsyncTest extends TestCase
 
         $deferred->reject(new \RuntimeException('Test', 42));
 
+        /** @var \RuntimeException $exception */
         $this->assertInstanceof(\RuntimeException::class, $exception);
-        assert($exception instanceof \RuntimeException);
         $this->assertEquals('Test', $exception->getMessage());
         $this->assertEquals(42, $exception->getCode());
     }
 
-    public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsAfterAwaitingPromise()
+    public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsAfterAwaitingPromise(): void
     {
         $promise = async(function () {
             $promise = new Promise(function ($resolve) {
@@ -143,7 +143,7 @@ class AsyncTest extends TestCase
         $this->assertEquals(42, $value);
     }
 
-    public function testAsyncReturnsPromiseThatRejectsWithExceptionWhenCallbackThrowsAfterAwaitingPromise()
+    public function testAsyncReturnsPromiseThatRejectsWithExceptionWhenCallbackThrowsAfterAwaitingPromise(): void
     {
         $promise = async(function () {
             $promise = new Promise(function ($_, $reject) {
@@ -159,7 +159,7 @@ class AsyncTest extends TestCase
         await($promise);
     }
 
-    public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsAfterAwaitingTwoConcurrentPromises()
+    public function testAsyncReturnsPromiseThatFulfillsWithValueWhenCallbackReturnsAfterAwaitingTwoConcurrentPromises(): void
     {
         $promise1 = async(function () {
             $promise = new Promise(function ($resolve) {
@@ -174,6 +174,7 @@ class AsyncTest extends TestCase
                 Loop::addTimer(0.11, fn () => $resolve($theAnswerToLifeTheUniverseAndEverything));
             });
 
+            /** @var int */
             return await($promise);
         })(42);
 
@@ -186,7 +187,7 @@ class AsyncTest extends TestCase
         $this->assertLessThan(0.12, $time);
     }
 
-    public function testCancelAsyncWillReturnRejectedPromiseWhenCancellingPendingPromiseRejects()
+    public function testCancelAsyncWillReturnRejectedPromiseWhenCancellingPendingPromiseRejects(): void
     {
         $promise = async(function () {
             await(new Promise(function () { }, function () {
@@ -194,12 +195,13 @@ class AsyncTest extends TestCase
             }));
         })();
 
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
 
         $promise->then(null, $this->expectCallableOnceWith(new \RuntimeException('Operation cancelled')));
     }
 
-    public function testCancelAsyncWillReturnFulfilledPromiseWhenCancellingPendingPromiseRejectsInsideCatchThatReturnsValue()
+    public function testCancelAsyncWillReturnFulfilledPromiseWhenCancellingPendingPromiseRejectsInsideCatchThatReturnsValue(): void
     {
         $promise = async(function () {
             try {
@@ -211,12 +213,13 @@ class AsyncTest extends TestCase
             }
         })();
 
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
 
         $promise->then($this->expectCallableOnceWith(42));
     }
 
-    public function testCancelAsycWillReturnPendigPromiseWhenCancellingFirstPromiseRejectsInsideCatchThatAwaitsSecondPromise()
+    public function testCancelAsycWillReturnPendigPromiseWhenCancellingFirstPromiseRejectsInsideCatchThatAwaitsSecondPromise(): void
     {
         $promise = async(function () {
             try {
@@ -230,12 +233,13 @@ class AsyncTest extends TestCase
             }
         })();
 
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
 
         $promise->then($this->expectCallableNever(), $this->expectCallableNever());
     }
 
-    public function testCancelAsyncWillCancelNestedAwait()
+    public function testCancelAsyncWillCancelNestedAwait(): void
     {
         self::expectOutputString('abc');
         $this->expectException(\RuntimeException::class);
@@ -259,6 +263,7 @@ class AsyncTest extends TestCase
             return time();
         })();
 
+        assert(method_exists($promise, 'cancel'));
         $promise->cancel();
         await($promise);
     }

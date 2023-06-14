@@ -6,6 +6,7 @@ use React;
 use React\EventLoop\Loop;
 use React\Promise\Deferred;
 use React\Promise\Promise;
+use React\Promise\PromiseInterface;
 use function React\Async\async;
 
 class AwaitTest extends TestCase
@@ -13,7 +14,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitThrowsExceptionWhenPromiseIsRejectedWithException(callable $await)
+    public function testAwaitThrowsExceptionWhenPromiseIsRejectedWithException(callable $await): void
     {
         $promise = new Promise(function () {
             throw new \Exception('test');
@@ -27,7 +28,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitThrowsExceptionWithoutRunningLoop(callable $await)
+    public function testAwaitThrowsExceptionWithoutRunningLoop(callable $await): void
     {
         $now = true;
         Loop::futureTick(function () use (&$now) {
@@ -48,7 +49,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitThrowsExceptionImmediatelyWhenPromiseIsRejected(callable $await)
+    public function testAwaitThrowsExceptionImmediatelyWhenPromiseIsRejected(callable $await): void
     {
         $deferred = new Deferred();
 
@@ -72,7 +73,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitAsyncThrowsExceptionImmediatelyWhenPromiseIsRejected(callable $await)
+    public function testAwaitAsyncThrowsExceptionImmediatelyWhenPromiseIsRejected(callable $await): void
     {
         $deferred = new Deferred();
 
@@ -100,7 +101,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitThrowsExceptionImmediatelyInCustomFiberWhenPromiseIsRejected(callable $await)
+    public function testAwaitThrowsExceptionImmediatelyInCustomFiberWhenPromiseIsRejected(callable $await): void
     {
         $fiber = new \Fiber(function () use ($await) {
             $promise = new Promise(function ($resolve) {
@@ -121,7 +122,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithFalse(callable $await)
+    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithFalse(callable $await): void
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');
@@ -139,7 +140,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithNull(callable $await)
+    public function testAwaitThrowsUnexpectedValueExceptionWhenPromiseIsRejectedWithNull(callable $await): void
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');
@@ -163,7 +164,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitThrowsErrorWhenPromiseIsRejectedWithError(callable $await)
+    public function testAwaitThrowsErrorWhenPromiseIsRejectedWithError(callable $await): void
     {
         $promise = new Promise(function ($_, $reject) {
             throw new \Error('Test', 42);
@@ -178,7 +179,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitReturnsValueWhenPromiseIsFullfilled(callable $await)
+    public function testAwaitReturnsValueWhenPromiseIsFullfilled(callable $await): void
     {
         $promise = new Promise(function ($resolve) {
             $resolve(42);
@@ -190,7 +191,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitReturnsValueImmediatelyWithoutRunningLoop(callable $await)
+    public function testAwaitReturnsValueImmediatelyWithoutRunningLoop(callable $await): void
     {
         $now = true;
         Loop::futureTick(function () use (&$now) {
@@ -208,7 +209,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitReturnsValueImmediatelyWhenPromiseIsFulfilled(callable $await)
+    public function testAwaitReturnsValueImmediatelyWhenPromiseIsFulfilled(callable $await): void
     {
         $deferred = new Deferred();
 
@@ -229,7 +230,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitAsyncReturnsValueImmediatelyWhenPromiseIsFulfilled(callable $await)
+    public function testAwaitAsyncReturnsValueImmediatelyWhenPromiseIsFulfilled(callable $await): void
     {
         $deferred = new Deferred();
 
@@ -254,7 +255,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitReturnsValueImmediatelyInCustomFiberWhenPromiseIsFulfilled(callable $await)
+    public function testAwaitReturnsValueImmediatelyInCustomFiberWhenPromiseIsFulfilled(callable $await): void
     {
         $fiber = new \Fiber(function () use ($await) {
             $promise = new Promise(function ($resolve) {
@@ -273,7 +274,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitShouldNotCreateAnyGarbageReferencesForResolvedPromise(callable $await)
+    public function testAwaitShouldNotCreateAnyGarbageReferencesForResolvedPromise(callable $await): void
     {
         if (class_exists('React\Promise\When')) {
             $this->markTestSkipped('Not supported on legacy Promise v1 API');
@@ -293,7 +294,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitShouldNotCreateAnyGarbageReferencesForRejectedPromise(callable $await)
+    public function testAwaitShouldNotCreateAnyGarbageReferencesForRejectedPromise(callable $await): void
     {
         if (class_exists('React\Promise\When')) {
             $this->markTestSkipped('Not supported on legacy Promise v1 API');
@@ -317,7 +318,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAwaitShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithNullValue(callable $await)
+    public function testAwaitShouldNotCreateAnyGarbageReferencesForPromiseRejectedWithNullValue(callable $await): void
     {
         if (!interface_exists('React\Promise\CancellablePromiseInterface')) {
             $this->markTestSkipped('Promises must be rejected with a \Throwable instance since Promise v3');
@@ -345,7 +346,7 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testAlreadyFulfilledPromiseShouldNotSuspendFiber(callable $await)
+    public function testAlreadyFulfilledPromiseShouldNotSuspendFiber(callable $await): void
     {
         for ($i = 0; $i < 6; $i++) {
             $this->assertSame($i, $await(React\Promise\resolve($i)));
@@ -355,13 +356,13 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testNestedAwaits(callable $await)
+    public function testNestedAwaits(callable $await): void
     {
         $this->assertTrue($await(new Promise(function ($resolve) use ($await) {
             $resolve($await(new Promise(function ($resolve) use ($await) {
                 $resolve($await(new Promise(function ($resolve) use ($await) {
                     $resolve($await(new Promise(function ($resolve) use ($await) {
-                        $resolve($await(new Promise(function ($resolve) use ($await) {
+                        $resolve($await(new Promise(function ($resolve) {
                             Loop::addTimer(0.01, function () use ($resolve) {
                                 $resolve(true);
                             });
@@ -375,10 +376,11 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testResolvedPromisesShouldBeDetached(callable $await)
+    public function testResolvedPromisesShouldBeDetached(callable $await): void
     {
         $await(async(function () use ($await): int {
             $fiber = \Fiber::getCurrent();
+            assert($fiber instanceof \Fiber);
             $await(new Promise(function ($resolve) {
                 Loop::addTimer(0.01, fn() => $resolve(null));
             }));
@@ -391,13 +393,14 @@ class AwaitTest extends TestCase
     /**
      * @dataProvider provideAwaiters
      */
-    public function testRejectedPromisesShouldBeDetached(callable $await)
+    public function testRejectedPromisesShouldBeDetached(callable $await): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Boom!');
 
         $await(async(function () use ($await): int {
             $fiber = \Fiber::getCurrent();
+            assert($fiber instanceof \Fiber);
             try {
                 $await(React\Promise\reject(new \Exception('Boom!')));
             } catch (\Throwable $throwable) {
@@ -410,6 +413,7 @@ class AwaitTest extends TestCase
         })());
     }
 
+    /** @return iterable<string,list<callable(PromiseInterface): mixed>> */
     public function provideAwaiters(): iterable
     {
         yield 'await' => [static fn (React\Promise\PromiseInterface $promise): mixed => React\Async\await($promise)];

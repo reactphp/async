@@ -9,8 +9,12 @@ use React\EventLoop\Loop;
  */
 final class SimpleFiber implements FiberInterface
 {
+    /** @var ?\Fiber<void,void,void,callable(): mixed> */
     private static ?\Fiber $scheduler = null;
+
     private static ?\Closure $suspend = null;
+
+    /** @var ?\Fiber<mixed,mixed,mixed,mixed> */
     private ?\Fiber $fiber = null;
 
     public function __construct()
@@ -57,13 +61,17 @@ final class SimpleFiber implements FiberInterface
                 self::$scheduler = new \Fiber(static fn() => Loop::run());
                 // Run event loop to completion on shutdown.
                 \register_shutdown_function(static function (): void {
+                    assert(self::$scheduler instanceof \Fiber);
                     if (self::$scheduler->isSuspended()) {
                         self::$scheduler->resume();
                     }
                 });
             }
 
-            return (self::$scheduler->isStarted() ? self::$scheduler->resume() : self::$scheduler->start())();
+            $ret = (self::$scheduler->isStarted() ? self::$scheduler->resume() : self::$scheduler->start());
+            assert(\is_callable($ret));
+
+            return $ret();
         }
 
         return \Fiber::suspend();
