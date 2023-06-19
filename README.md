@@ -392,7 +392,7 @@ $promise->then(function (int $bytes) {
 });
 ```
 
-## delay()
+### delay()
 
 The `delay(float $seconds): void` function can be used to
 delay program execution for duration given in `$seconds`.
@@ -421,7 +421,7 @@ same loop until the delay returns:
 
 ```php
 echo 'a';
-Loop::addTimer(1.0, function () {
+Loop::addTimer(1.0, function (): void {
     echo 'b';
 });
 React\Async\delay(3.0);
@@ -453,13 +453,13 @@ Everything inside this function will still be blocked, but everything outside
 this function can be executed asynchronously without blocking:
 
 ```php
-Loop::addTimer(0.5, React\Async\async(function () {
+Loop::addTimer(0.5, React\Async\async(function (): void {
     echo 'a';
     React\Async\delay(1.0);
     echo 'c';
 }));
 
-Loop::addTimer(1.0, function () {
+Loop::addTimer(1.0, function (): void {
     echo 'b';
 });
 
@@ -481,13 +481,13 @@ promise will clean up any pending timers and throw a `RuntimeException` from
 the pending delay which in turn would reject the resulting promise.
 
 ```php
-$promise = async(function () {
+$promise = async(function (): void {
     echo 'a';
     delay(3.0);
     echo 'b';
-});
+})();
 
-Loop::addTimer(2.0, function () use ($promise) {
+Loop::addTimer(2.0, function () use ($promise): void {
     $promise->cancel();
 });
 
