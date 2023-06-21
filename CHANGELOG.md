@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.1.0 (2023-06-22)
+
+*   Feature: Add new `delay()` function to delay program execution.
+    (#71 by @clue)
+
+    ```php
+    echo 'a';
+    Loop::addTimer(1.0, function () {
+        echo 'b';
+    });
+    React\Async\delay(3.0);
+    echo 'c';
+
+    // prints "a" at t=0.0s
+    // prints "b" at t=1.0s
+    // prints "c" at t=3.0s
+    ```
+
+*   Update test suite, add PHPStan with `max` level and report failed assertions.
+    (#67 and #77 by @clue and #60 and #74 by @WyriHaximus)
+
 ## 3.0.0 (2022-07-11)
 
 A major new feature release, see [**release announcement**](https://clue.engineering/2022/announcing-reactphp-async).
