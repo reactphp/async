@@ -193,6 +193,8 @@ class CoroutineTest extends TestCase
             });
         });
 
+        $promise->then(null, $this->expectCallableOnce()); // avoid reporting unhandled rejection
+
         unset($promise);
 
         $this->assertEquals(0, gc_collect_cycles());
@@ -232,6 +234,8 @@ class CoroutineTest extends TestCase
             yield; // @phpstan-ignore-line
         });
 
+        $promise->then(null, $this->expectCallableOnce()); // avoid reporting unhandled rejection
+
         unset($promise);
 
         $this->assertEquals(0, gc_collect_cycles());
@@ -248,6 +252,8 @@ class CoroutineTest extends TestCase
         $promise = coroutine(function () {
             yield 42;
         });
+
+        $promise->then(null, $this->expectCallableOnce()); // avoid reporting unhandled rejection
 
         unset($promise);
 
