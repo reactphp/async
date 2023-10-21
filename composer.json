@@ -31,7 +31,7 @@
         "react/promise": "^3.0 || ^2.8 || ^1.2.1"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5 || ^5.7 || ^4.8.35"
+        "phpunit/phpunit": "^9.6 || ^5.7 || ^4.8.35"
     },
     "autoload": {
         "files": [
@@ -39,6 +39,8 @@
         ]
     },
     "autoload-dev": {
-        "psr-4": { "React\\Tests\\Async\\": "tests/" }
+        "psr-4": {
+            "React\\Tests\\Async\\": "tests/"
+        }
     }
 }
