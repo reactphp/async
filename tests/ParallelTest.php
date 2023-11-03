@@ -12,6 +12,9 @@ class ParallelTest extends TestCase
 {
     public function testParallelWithoutTasks(): void
     {
+        /**
+         * @var array<callable(): React\Promise\PromiseInterface<mixed>> $tasks
+         */
         $tasks = array();
 
         $promise = React\Async\parallel($tasks);

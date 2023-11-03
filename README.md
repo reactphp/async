@@ -57,7 +57,7 @@ Async\await(…);
 
 ### await()
 
-The `await(PromiseInterface $promise): mixed` function can be used to
+The `await(PromiseInterface<T> $promise): T` function can be used to
 block waiting for the given `$promise` to be fulfilled.
 
 ```php
@@ -94,7 +94,7 @@ try {
 
 ### coroutine()
 
-The `coroutine(callable $function, mixed ...$args): PromiseInterface<mixed>` function can be used to
+The `coroutine(callable(mixed ...$args):(\Generator|PromiseInterface<T>|T) $function, mixed ...$args): PromiseInterface<T>` function can be used to
 execute a Generator-based coroutine to "await" promises.
 
 ```php
@@ -277,7 +277,7 @@ trigger at the earliest possible time in the future.
 
 ### parallel()
 
-The `parallel(iterable<callable():PromiseInterface<mixed>> $tasks): PromiseInterface<array<mixed>>` function can be used
+The `parallel(iterable<callable():PromiseInterface<T>> $tasks): PromiseInterface<array<T>>` function can be used
 like this:
 
 ```php
@@ -319,7 +319,7 @@ React\Async\parallel([
 
 ### series()
 
-The `series(iterable<callable():PromiseInterface<mixed>> $tasks): PromiseInterface<array<mixed>>` function can be used
+The `series(iterable<callable():PromiseInterface<T>> $tasks): PromiseInterface<array<T>>` function can be used
 like this:
 
 ```php
@@ -361,7 +361,7 @@ React\Async\series([
 
 ### waterfall()
 
-The `waterfall(iterable<callable(mixed=):PromiseInterface<mixed>> $tasks): PromiseInterface<mixed>` function can be used
+The `waterfall(iterable<callable(mixed=):PromiseInterface<T>> $tasks): PromiseInterface<T>` function can be used
 like this:
 
 ```php

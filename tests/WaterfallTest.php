@@ -12,6 +12,9 @@ class WaterfallTest extends TestCase
 {
     public function testWaterfallWithoutTasks(): void
     {
+        /**
+         * @var array<callable(): React\Promise\PromiseInterface<mixed>> $tasks
+         */
         $tasks = array();
 
         $promise = React\Async\waterfall($tasks);
@@ -166,6 +169,9 @@ class WaterfallTest extends TestCase
             /** @var int */
             public $called = 0;
 
+            /**
+             * @return \Iterator<callable(): React\Promise\PromiseInterface<mixed>>
+             */
             public function getIterator(): \Iterator
             {
                 while (true) { // @phpstan-ignore-line
