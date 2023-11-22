@@ -623,7 +623,7 @@ This project follows [SemVer](https://semver.org/).
 This will install the latest supported version from this branch:
 
 ```bash
-composer require react/async:^4.1
+composer require react/async:^4.2
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.

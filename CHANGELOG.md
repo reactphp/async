@@ -1,5 +1,26 @@
 # Changelog
 
+## 4.2.0 (2023-11-22)
+
+*   Feature: Add Promise v3 template types for all public functions.
+    (#40 by @WyriHaximus)
+
+    All our public APIs now use Promise v3 template types to guide IDEs and static
+    analysis tools (like PHPStan), helping with proper type usage and improving
+    code quality:
+
+    ```php
+    assertType('bool', await(resolve(true)));
+    assertType('PromiseInterface<bool>', async(fn(): bool => true)());
+    assertType('PromiseInterface<bool>', coroutine(fn(): bool => true));
+    ```
+
+*   Feature: Full PHP 8.3 compatibility.
+    (#81 by @clue)
+
+*   Update test suite to avoid unhandled promise rejections.
+    (#79 by @clue)
+
 ## 4.1.0 (2023-06-22)
 
 *   Feature: Add new `delay()` function to delay program execution.
