@@ -1,5 +1,29 @@
 # Changelog
 
+## 3.2.0 (2023-11-22)
+
+This release contains backported features from the Async v4.2.0 release for those
+not yet on PHP 8.1+. Async v3 provides a compatible API, but may not take advantage
+of newer language features. We encourage upgrading to the latest version when possible.
+
+*   Feature: Add Promise v3 template types for all public functions.
+    (#82 by @clue)
+
+    All our public APIs now use Promise v3 template types to guide IDEs and static
+    analysis tools (like PHPStan), helping with proper type usage and improving
+    code quality:
+
+    ```php
+    assertType('bool', await(resolve(true)));
+    assertType('PromiseInterface<bool>', coroutine(fn(): bool => true));
+    ```
+
+*   Feature: Full PHP 8.3 compatibility.
+    (#83 by @clue)
+
+*   Update test suite to avoid unhandled promise rejections.
+    (#80 by @clue)
+
 ## 3.1.0 (2023-06-22)
 
 *   Feature: Add new `delay()` function to delay program execution.
