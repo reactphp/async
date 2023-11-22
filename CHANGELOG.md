@@ -1,6 +1,15 @@
 # Changelog
 
-## 2.1.0 (2023-06-22)
+## 2.2.0 (2023-11-22)
+
+This is a compatibility release to ensure a smooth upgrade path for those not yet
+on Async v4 or v3. We encourage upgrading to the latest version when possible, as
+Async v4 will be the way forward for this project.
+
+*   Feature: Full PHP 8.3 compatibility.
+    (#84 by @clue)
+
+## 2.1.0 (023-06-22)
 
 *   Feature: Add new `delay()` function to delay program execution.
     (#72 by @clue)
