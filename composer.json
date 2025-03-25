@@ -28,10 +28,10 @@
     "require": {
         "php": ">=7.1",
         "react/event-loop": "^1.2",
-        "react/promise": "^3.0 || ^2.8 || ^1.2.1"
+        "react/promise": "^3.2 || ^2.8 || ^1.2.1"
     },
     "require-dev": {
-        "phpstan/phpstan": "1.10.39 || 1.4.10",
+        "phpstan/phpstan": "1.12.19 || 1.4.10",
         "phpunit/phpunit": "^9.6 || ^8.5 || ^7.5"
     },
     "autoload": {
