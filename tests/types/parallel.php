@@ -6,7 +6,9 @@ use function React\Async\await;
 use function React\Async\parallel;
 use function React\Promise\resolve;
 
-assertType('React\Promise\PromiseInterface<array>', parallel([]));
+/** @var array<callable():mixed> $emptyArray */
+$emptyArray = [];
+assertType('React\Promise\PromiseInterface<array>', parallel($emptyArray));
 
 assertType('React\Promise\PromiseInterface<array<bool|float|int>>', parallel([
     static fn (): PromiseInterface => resolve(true),

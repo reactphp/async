@@ -6,7 +6,9 @@ use function React\Async\await;
 use function React\Async\series;
 use function React\Promise\resolve;
 
-assertType('React\Promise\PromiseInterface<array>', series([]));
+/** @var array<callable():mixed> $emptyArray */
+$emptyArray = [];
+assertType('React\Promise\PromiseInterface<array>', series($emptyArray));
 
 assertType('React\Promise\PromiseInterface<array<bool|float|int>>', series([
     static fn (): PromiseInterface => resolve(true),
