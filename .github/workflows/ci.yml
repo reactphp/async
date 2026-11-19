@@ -7,10 +7,12 @@ on:
 jobs:
   PHPUnit:
     name: PHPUnit (PHP ${{ matrix.php }})
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         php:
+          - 8.5
+          - 8.4
           - 8.3
           - 8.2
           - 8.1
@@ -20,7 +22,7 @@ jobs:
           - 7.2
           - 7.1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -34,10 +36,12 @@ jobs:
 
   PHPStan:
     name: PHPStan (PHP ${{ matrix.php }})
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         php:
+          - 8.5
+          - 8.4
           - 8.3
           - 8.2
           - 8.1
@@ -46,7 +50,7 @@ jobs:
           - 7.3
           - 7.2
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
